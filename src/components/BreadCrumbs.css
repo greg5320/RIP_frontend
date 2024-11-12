@@ -1,0 +1,31 @@
+.breadcrumbs-container {
+  padding: 10px 0;
+  margin-top: 5px;
+}
+
+.breadcrumbs {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  padding: 0;
+  margin: 0;
+  color: #ffffff; 
+}
+
+.breadcrumbs li {
+  margin-right: 5px;
+}
+
+.breadcrumbs li a {
+  text-decoration: none;
+  color: #ffffff; 
+}
+
+.breadcrumbs li a:hover {
+  color: #ffc107; 
+}
+
+.breadcrumbs .slash {
+  color: #ffffff; 
+}

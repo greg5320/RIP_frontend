@@ -1,0 +1,86 @@
+.header-line {
+    margin: 20px 0;
+    border: 1px solid white;
+    width: 100%;
+  }
+  
+  .map-card {
+    background-color: #333;
+    border: 2px solid #111;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .map-title {
+    background-color: #00258C;
+    color: white;
+    padding: 10px;
+    font-size: 1.5em;
+  }
+  
+  .map-card-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+  }
+  
+  .general-info {
+    background-color: #00258C;
+    padding: 10px 0;
+    border-top: 2px solid #0044cc;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 20px;
+    background-color: #444;
+    border-bottom: 1px solid #555;
+  }
+  
+  .info-label {
+    color: #888;
+    font-weight: bold;
+  }
+  
+  .info-value {
+    color: white;
+  }
+  
+  .map-description {
+    background-color: #222;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .map-description p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+  }
+  
+  .header-back-button {
+    font-size: 16px;
+    margin-top: 10px;
+    margin-left: 17px;
+  }
+  
+  .header-line {
+    margin-top: 1px;
+    margin-left: -17px;
+  }
+  
+  a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .general-info h3{
+    color: white;
+  }

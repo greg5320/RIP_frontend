@@ -24,7 +24,7 @@ const MapList: React.FC = () => {
 
   const fetchMaps = async (title: string = '') => {
     try {
-      const response = await fetch(`http://localhost:8000/maps/?title=${title}`);
+      const response = await fetch(`/maps/?title=${title}`);
       if (!response.ok) {
         throw new Error('Ошибка в получении карт');
       }

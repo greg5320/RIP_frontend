@@ -22,29 +22,11 @@ export interface MapPool {
   maps: Map[];
 }
 
-const BASE_URL = 'http://localhost:8000';
+// const BASE_URL = 'http://localhost:8000';
 
-
-export const fetchMaps = async (): Promise<Map[]> => {
-  try {
-    const response = await fetch(`${BASE_URL}/maps/`);
-    if (!response.ok) {
-      throw new Error('Ошибка в получении карт');
-    }
-    const data = await response.json();
-    if (data.maps) {
-      return data.maps;
-    } else {
-      throw new Error('Нет карт в ответе');
-    }
-  } catch (error) {
-    console.warn('Не удалось получить карты с бекенда, используем моковые данные:', error);
-    return mockMaps;
-  }
-};
 
 export const fetchMapById = async (id: number): Promise<Map> => {
-  const url = `${BASE_URL}/maps/${id}/`;
+  const url = `/maps/${id}/`;
   try {
     const response = await fetch(url);
     if (!response.ok) {

@@ -60,16 +60,6 @@ const MapList: React.FC = () => {
       <BreadCrumbs crumbs={[{ label: "Карты", path: "/maps" }]} /> 
       <Container >
         <h3>Список карт</h3>
-        <div className="cart-icon-container">
-          <a href="/map_pool" className="cart-link">
-            <Image
-              src="http://127.0.0.1:9000/mybucket/cart.png"
-              alt="Корзина"
-              className="cart-icon"
-              roundedCircle
-            />
-          </a>
-        </div>
         <form className="find-button" onSubmit={(e) => e.preventDefault()}>
           <Row className="justify-content-center align-items-center">
             <Col xs={12} sm={8} md={6} lg={4} className="search-field">
@@ -82,7 +72,7 @@ const MapList: React.FC = () => {
               />
             </Col>
             <Col xs="auto">
-              <Button type="submit" variant="primary" className="mt-2">
+              <Button type="submit" variant="primary">
                 Поиск
               </Button>
             </Col>

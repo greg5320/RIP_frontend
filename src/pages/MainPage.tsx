@@ -18,21 +18,21 @@ const MainPage: React.FC = () => {
           <Carousel.Item>
             <img
               className="d-block w-100 full-width-img"
-              src="http://127.0.0.1:9000/mybucket/Ephemeron.webp"
+              src="../../Starcraft-map-picker-frontend/Ephemeron.webp"
               alt="Первый слайд"
             />
           </Carousel.Item>
           <Carousel.Item>
             <img
               className="d-block w-100 full-width-img"
-              src="http://127.0.0.1:9000/mybucket/Oxide.webp"
+              src="../../Starcraft-map-picker-frontend/Oxide.webp"
               alt="Второй слайд"
             />
           </Carousel.Item>
           <Carousel.Item>
             <img
               className="d-block w-100 full-width-img"
-              src="http://127.0.0.1:9000/mybucket/Fortitude.webp"
+              src="../../Starcraft-map-picker-frontend/Fortitude.webp"
               alt="Третий слайд"
             />
           </Carousel.Item>

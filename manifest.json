@@ -4,7 +4,7 @@
   "start_url": "/Starcraft-map-picker-frontend/",
   "display": "standalone",
   "background_color": "#fdfdfd",
-  "theme_color": "#00258C",
+  "theme_color": "#000000",
   "orientation": "portrait-primary",
   "icons": [
     {

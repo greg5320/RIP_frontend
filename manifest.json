@@ -8,12 +8,12 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/Starcraft-map-picker-frontend/logo192.jpeg",
-      "type": "image/jpeg",
+      "src": "/Starcraft-map-picker-frontend/logo192.png",
+      "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/Starcraft-map-picker-frontend/logo512.png",
+      "src": "/Starcraft-map-picker-frontend/logo192.png",
       "type": "image/png",
       "sizes": "512x512"
     }

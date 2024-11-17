@@ -1,5 +1,5 @@
 {
-  "name": "Stacraft map picker1",
+  "name": "Stacraft map picker",
   "short_name": "Stacraft map picker",
   "start_url": "/Starcraft-map-picker-frontend/",
   "display": "standalone",

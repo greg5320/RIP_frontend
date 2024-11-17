@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import MapList from './pages/MapList';
 import MapDetails from './pages/MapDetails';
 import MainPage from './pages/MainPage';
@@ -15,7 +15,7 @@ import RegistrationPage from './pages/Registration';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <BrowserRouter basename="/Starcraft-map-picker-frontend">
       <Routes>
         <Route path="/maps/:id" element={<MapDetails />} />
         <Route path="/maps" element={<MapList />} />
@@ -30,7 +30,7 @@ const App: React.FC = () => {
         <Route path="/map_pools" element={<MapPoolListPage />} />
         <Route path="/map_pools/1" element={<MapPoolDetail />} />
       </Routes>
-    </Router>
+      </BrowserRouter>
   );
 };
 

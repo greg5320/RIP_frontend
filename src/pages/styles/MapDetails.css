@@ -84,3 +84,46 @@
   .general-info h3{
     color: white;
   }
+
+  @media (max-width: 768px) {
+    .map-content {
+      flex-direction: column;
+    }
+  
+    .map-card {
+      margin-bottom: 15px;
+    }
+  
+    .info-row {
+      padding: 5px 10px;
+    }
+  
+    .map-description {
+      padding: 15px;
+    }
+  
+    .map-title {
+      font-size: 1.2em;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .map-title {
+      font-size: 1em;
+      padding: 8px;
+    }
+  
+    .map-description {
+      padding: 10px;
+    }
+  
+    .info-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .info-label, .info-value {
+      font-size: 0.9em;
+    }
+  }
+  

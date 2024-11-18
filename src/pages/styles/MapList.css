@@ -60,6 +60,17 @@ body {
   h3 {
     font-size: 28px;
   }
+  .map-item {
+    max-width: 350px;
+    min-height: 100px;
+    min-width: 160px;
+    text-align: center;
+  }
+  .map-item img {
+    max-width: 350px; 
+    min-height: 100px;
+    min-width: 160px;
+  }
 
   .search-field {
     width: 100%;
@@ -70,6 +81,9 @@ body {
   .find-button input {
     width: 100%;
     margin-bottom: 10px;
+  }
+  .map-container {
+    gap: 10px;
   }
 
   .find-button button {
@@ -85,7 +99,54 @@ body {
   }
 }
 
+@media (max-width: 393px) {
+  .map-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .map-item img {
+    max-width: 250px;
+    max-height: 200px;
+  }
+
+  h3 {
+    font-size: 20px;
+  }
+}
+
 @media (min-width: 1024px) {
+  .map-container {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px; 
+  }
+
+  .map-item img {
+    max-width: 350px; 
+    min-height: 100px;
+    min-width: 160px;
+  }
+
+  .map-item {
+    max-width: 350px;
+    min-height: 100px;
+    min-width: 160px;
+    text-align: center;
+  }
+
+  .find-button {
+    margin-top: 0; 
+  }
+  .search-field {
+    width: 100%;
+  }
+
+  .find-button button {
+    margin-left: 15px; 
+  }
+}
+
+@media (min-width: 768px) {
   .map-container {
     gap: 10px; 
   }
@@ -114,3 +175,4 @@ body {
     margin-left: 15px; 
   }
 }
+

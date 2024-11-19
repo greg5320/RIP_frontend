@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import MapList from './pages/MapList';
 import MapDetails from './pages/MapDetails';
@@ -30,7 +29,7 @@ const App: React.FC = () => {
         <Route path="/map_pools" element={<MapPoolListPage />} />
         <Route path="/map_pools/1" element={<MapPoolDetail />} />
       </Routes>
-      </BrowserRouter>
+    </BrowserRouter>
   );
 };
 

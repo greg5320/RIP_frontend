@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/maps': {
-        target: 'http://localhost:8000',
+        target: 'http://192.168.1.72:8000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/maps/, '/maps'),
       },

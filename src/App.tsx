@@ -10,7 +10,7 @@ import MapListTable from './pages/MapListTable';
 import MapPoolDetail from './pages/MapPoolDetails';
 import MapPoolListPage from './pages/MapPoolList';
 import ProfilePage from './pages/Profile';
-import RegistrationPage from './pages/Registration';
+import RegistrationPage from './pages/RegistrationPage';
 
 const App: React.FC = () => {
   return (
@@ -19,9 +19,9 @@ const App: React.FC = () => {
         <Route path="/maps/:id" element={<MapDetails />} />
         <Route path="/maps" element={<MapList />} />
         <Route path="/" element={<MainPage />} />
-        <Route path="/users/login" element={<AuthPage />} />
-        <Route path="/users/register" element={<RegistrationPage />} />
-        <Route path="/users/profile" element={<ProfilePage />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/maps/table" element={<MapListTable />} />
         <Route path="/maps/edit" element={<EditMapPage />} />
         <Route path="/404" element={<Page404 />} />

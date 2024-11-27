@@ -1,0 +1,16 @@
+.registration-container {
+    max-width: 400px;
+    margin: 50px auto;
+    background-color: #00258c;
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+  }
+  .registration-container h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  .registration-container .form-control {
+    margin-bottom: 15px;
+  }
+  

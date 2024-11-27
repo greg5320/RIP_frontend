@@ -10,7 +10,7 @@
   font-size: 14px;
   padding: 0;
   margin: 0;
-  color: #ffffff; 
+  color: #ffffff;
 }
 
 .breadcrumbs li {
@@ -19,13 +19,13 @@
 
 .breadcrumbs li a {
   text-decoration: none;
-  color: #ffffff; 
+  color: #ffffff;
 }
 
 .breadcrumbs li a:hover {
-  color: #ffc107; 
+  color: #ffc107;
 }
 
 .breadcrumbs .slash {
-  color: #ffffff; 
+  color: #ffffff;
 }

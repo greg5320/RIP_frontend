@@ -4,10 +4,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/AuthPage.css';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
-
-const AuthPage: React.FC = () => {
+const RegistrationPage: React.FC = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +21,7 @@ const AuthPage: React.FC = () => {
         <Container>
           <Row className="justify-content-center">
             <Col md={6} className="auth-form-container">
-              <h2>Вход</h2>
+              <h2>Регистрация</h2>
               <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formLogin">
                   <Form.Label>Логин</Form.Label>
@@ -43,15 +43,25 @@ const AuthPage: React.FC = () => {
                   />
                 </Form.Group>
 
-                <Button type="submit" className="enter-button-margin">
-                  Войти
+                <Form.Group controlId="formConfirmPassword">
+                  <Form.Label>Подтвердите пароль</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Подтвердите пароль"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </Form.Group>
+
+                <Button variant="primary" type="submit" className="enter-button-margin">
+                  Зарегистрироваться
                 </Button>
               </Form>
               <div className="mt-3 text-center">
                 <p>
-                  Нет аккаунта?{' '}
-                  <Link to="/register" className="text-white">
-                    Зарегистрируйтесь
+                  Eсть аккаунт?{' '}
+                  <Link to="/login" className="text-white">
+                    Войдите
                   </Link>
                 </p>
               </div>
@@ -63,4 +73,4 @@ const AuthPage: React.FC = () => {
   );
 };
 
-export default AuthPage;
+export default RegistrationPage;

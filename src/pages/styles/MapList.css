@@ -14,6 +14,7 @@ body {
   padding: 10px;
 }
 
+
 .map-item {
   text-align: center;
   display: flex;
@@ -34,7 +35,9 @@ body {
   text-align: center;
   padding-top: 10px; 
 }
-
+.search-button{
+  background-color: #00258C;
+}
 .find-button {
   display: flex;
   align-items: center;

@@ -1,4 +1,5 @@
 import { mockMaps } from './mockData';
+import axios from 'axios';
 
 export interface Map {
   id: number;
@@ -26,16 +27,10 @@ export interface MapPool {
 
 
 export const fetchMapById = async (id: number): Promise<Map> => {
-  const url = `/maps/${id}/`;
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Ошибка в получении карты');
-    }
-    const data = await response.json();
-    return data;
+    const response = await axios.get(`/api/maps/${id}/`);
+    return response.data;
   } catch (error) {
-    
     console.warn('Ошибка при получении карты, используем моковые данные:', error);
     return mockMaps.find(map => map.id === id) || mockMaps[0];  
   }

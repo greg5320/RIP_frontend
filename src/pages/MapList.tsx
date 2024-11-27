@@ -10,6 +10,8 @@ import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { RootState } from '../store';
 import { setSearchTerm } from '../store/searchSlice';
+import axios from 'axios';
+
 
 const MapList: React.FC = () => {
   const [maps, setMaps] = useState<Map[]>([]);
@@ -30,21 +32,21 @@ const MapList: React.FC = () => {
   };
   const fetchMaps = async (title: string = '') => {
     try {
-      const response = await fetch(`/maps/?title=${title}`);
-      if (!response.ok) {
-        throw new Error('Ошибка в получении карт');
-      }
-      const data = await response.json();
+      const response = await axios.get(`/api/maps/`, {
+        params: { title },
+      });
+      const data = response.data;
+  
       if (data.maps) {
-        setMaps(data.maps);
-        setError(null);
+        setMaps(data.maps); // Устанавливаем карты
+        setError(null); // Очищаем ошибки
       } else {
         setMaps([]);
         setError('Нет карт, соответствующих запросу');
       }
     } catch (error) {
       console.warn('Ошибка при загрузке карт, используем моковые данные');
-      setMaps(filterMaps(title));
+      setMaps(filterMaps(title)); // Моковые данные
       setError('Ошибка при загрузке карт, используем моковые данные');
       console.error(error);
     }
@@ -84,7 +86,7 @@ const MapList: React.FC = () => {
               />
             </Col>
             <Col xs="auto">
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="primary" className='search-button'>
                 Поиск
               </Button>
             </Col>

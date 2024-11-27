@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../pages/styles/MainPage.css';
@@ -16,6 +16,11 @@ const Header: React.FC = () => {
           <Nav className="me-auto">
             <LinkContainer to="/maps">
               <Nav.Link>Карты</Nav.Link>
+            </LinkContainer>
+          </Nav>
+          <Nav className="ms-auto">
+            <LinkContainer to="/login">
+              <Button className="enter-button">Войти</Button>
             </LinkContainer>
           </Nav>
         </Navbar.Collapse>

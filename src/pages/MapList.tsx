@@ -10,7 +10,8 @@ import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { RootState } from '../store';
 import { setSearchTerm } from '../store/searchSlice';
-import axios from 'axios';
+// import axios from 'axios';
+import axiosInstance from '../modules/axios'; 
 
 
 const MapList: React.FC = () => {
@@ -32,21 +33,23 @@ const MapList: React.FC = () => {
   };
   const fetchMaps = async (title: string = '') => {
     try {
-      const response = await axios.get(`/api/maps/`, {
+      const response = await axiosInstance.get(`/api/maps/`, {
         params: { title },
+        withCredentials: true, 
       });
+      console.log('Request URL:', axiosInstance.defaults.baseURL + '/api/maps/');
       const data = response.data;
   
       if (data.maps) {
-        setMaps(data.maps); // Устанавливаем карты
-        setError(null); // Очищаем ошибки
+        setMaps(data.maps); 
+        setError(null);
       } else {
         setMaps([]);
         setError('Нет карт, соответствующих запросу');
       }
     } catch (error) {
       console.warn('Ошибка при загрузке карт, используем моковые данные');
-      setMaps(filterMaps(title)); // Моковые данные
+      setMaps(filterMaps(title)); 
       setError('Ошибка при загрузке карт, используем моковые данные');
       console.error(error);
     }

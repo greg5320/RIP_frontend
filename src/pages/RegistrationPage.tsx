@@ -3,15 +3,27 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/AuthPage.css';
 import { Link } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { registerUser } from '../store/authSlice';
 import Header from '../components/Header';
+
 const RegistrationPage: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const authStatus = useAppSelector((state) => state.auth.status);
+  const authError = useAppSelector((state) => state.auth.error);
+
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Логика отправки данных на сервер
+    if (password !== confirmPassword) {
+      alert('Пароли не совпадают');
+      return;
+    }
+    const email = `${login}@example.com`; 
+    dispatch(registerUser({ username: login, password, email }));
   };
 
   return (
@@ -22,7 +34,7 @@ const RegistrationPage: React.FC = () => {
           <Row className="justify-content-center">
             <Col md={6} className="auth-form-container">
               <h2>Регистрация</h2>
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleRegister}>
                 <Form.Group controlId="formLogin">
                   <Form.Label>Логин</Form.Label>
                   <Form.Control
@@ -57,9 +69,13 @@ const RegistrationPage: React.FC = () => {
                   Зарегистрироваться
                 </Button>
               </Form>
+
+              {authStatus === 'loading' && <p>Загрузка...</p>}
+              {authError && <p style={{ color: 'red' }}>{authError}</p>}
+
               <div className="mt-3 text-center">
                 <p>
-                  Eсть аккаунт?{' '}
+                  Уже есть аккаунт?{' '}
                   <Link to="/login" className="text-white">
                     Войдите
                   </Link>

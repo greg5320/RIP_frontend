@@ -8,7 +8,7 @@ import Page404 from './pages/404';
 import EditMapPage from './pages/EditMapPage';
 import MapListTable from './pages/MapListTable';
 import MapPoolDetail from './pages/MapPoolDetails';
-import MapPoolListPage from './pages/MapPoolList';
+import MapPoolList from './pages/MapPoolList';
 import ProfilePage from './pages/Profile';
 import RegistrationPage from './pages/RegistrationPage';
 import { fetchUserProfile } from './store/userSlice';
@@ -34,7 +34,7 @@ const App: React.FC = () => {
         <Route path="/maps/edit" element={<EditMapPage />} />
         <Route path="/404" element={<Page404 />} />
         <Route path="/403" element={<Page403 />} />
-        <Route path="/map_pools" element={<MapPoolListPage />} />
+        <Route path="/map_pools" element={<MapPoolList />} />
         <Route path="/map_pools/1" element={<MapPoolDetail />} />
       </Routes>
     </BrowserRouter>

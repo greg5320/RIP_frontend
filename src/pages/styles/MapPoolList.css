@@ -1,0 +1,99 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .map-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .map-item img {
+    width: 100%;
+    height: auto;
+    max-width: 200px;
+    max-height: 150px;
+    object-fit: cover;
+  }
+  
+  .map-item p {
+    margin-top: 10px;
+    font-size: 14px;
+    color: white;
+  }
+  
+  .map-pool-item {
+    border: 1px solid #333;
+    padding: 20px;
+    background-color: #222;
+    margin-bottom: 20px;
+  }
+  
+  .map-pool-item h5 {
+    color: #ccc;
+  }
+  
+  .map-pool-image {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  button {
+    background-color: #ff0000;
+    border: none;
+    padding: 8px 16px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #e60000;
+  }
+  
+  button:focus {
+    outline: none;
+  }
+  
+  .custom-input {
+    width: 250px; 
+    background-color: #f8f9fa; 
+    border-color: #00258C; 
+    color: #00258C; 
+    font-size: 14px;
+  }
+  
+  /* Стили для кнопки */
+  .custom-button {
+    background-color: #00258C; 
+    border-color: #00258C; 
+    color: white; 
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 10px;;
+    width: 19.3%;
+  }
+  
+  .custom-button:hover {
+    background-color: #001e5e; 
+    border-color: #001e5e;
+  }
+
+  @media (max-width: 500px){
+    .custom-button {
+        
+        width: 100px;
+      }
+      .custom-input {
+        width: 180px; 
+
+      }
+  }
+  .text-success {
+    color: green;
+    font-weight: bold;
+  }

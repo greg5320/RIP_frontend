@@ -13,12 +13,11 @@ const initialState: UserState = {
   error: null,
 };
 
-// Экшн для загрузки данных пользователя
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
   async () => {
-    const response = await axiosInstance.get('/api/users/profile/'); // Пример запроса на сервер
-    return response.data; // Возвращаем данные пользователя
+    const response = await axiosInstance.get('/api/users/profile/'); 
+    return response.data; 
   }
 );
 
@@ -33,7 +32,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.username = action.payload.username; // Записываем имя пользователя
+        state.username = action.payload.username; 
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.status = 'failed';

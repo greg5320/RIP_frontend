@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Button, FormControl, Container, Row, Col, Image } from 'react-bootstrap';
+import { FaShoppingCart } from 'react-icons/fa'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/MapList.css';
 import { Map } from '../modules/mapApi';
@@ -10,19 +11,18 @@ import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { RootState } from '../store';
 import { setSearchTerm } from '../store/searchSlice';
-// import axios from 'axios';
 import axiosInstance from '../modules/axios';
-
 
 const MapList: React.FC = () => {
   const [maps, setMaps] = useState<Map[]>([]);
   const [error, setError] = useState<string | null>(null);
-
+  const [draftPoolCount, setDraftPoolCount] = useState<number>(0); 
   const defaultImageUrl = 'http://127.0.0.1:9000/mybucket/map_not_found.png';
   const navigate = useNavigate();
-
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated); 
   const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
   const dispatch = useDispatch();
+
   const filterMaps = (title: string) => {
     if (title) {
       return mockMaps.filter((map) =>
@@ -31,6 +31,7 @@ const MapList: React.FC = () => {
     }
     return mockMaps;
   };
+
   const fetchMaps = async (title: string = '') => {
     try {
       const response = await axiosInstance.get(`/api/maps/`, {
@@ -55,10 +56,25 @@ const MapList: React.FC = () => {
     }
   };
 
+  const fetchDraftPoolInfo = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/maps/`);
+      const data = response.data;
+      
+      if (data.draft_pool_count !== undefined) {
+        setDraftPoolCount(data.draft_pool_count); 
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке информации о пуле карт', error);
+    }
+  };
+
   useEffect(() => {
     fetchMaps(searchTerm);
-  }, [searchTerm]);
-
+    if (isAuthenticated) {
+      fetchDraftPoolInfo(); 
+    }
+  }, [searchTerm, isAuthenticated]);
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -66,9 +82,16 @@ const MapList: React.FC = () => {
     fetchMaps(searchTerm);
   };
 
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchTerm(event.target.value));
+  };
+
+  const handleCartClick = () => {
+    if (isAuthenticated) {
+      navigate('/map_pools');
+    } else {
+      alert('Пожалуйста, авторизуйтесь, чтобы получить доступ к пулу карт.');
+    }
   };
 
   const addToDraft = async (mapId: number) => {
@@ -86,6 +109,17 @@ const MapList: React.FC = () => {
     <>
       <Header />
       <BreadCrumbs crumbs={[{ label: 'Карты', path: '/maps' }]} />
+      <div className="cart-icon-container">
+        <FaShoppingCart
+          size={30}
+          onClick={handleCartClick}
+          className="cart-icon"
+          style={{ cursor: isAuthenticated ? 'pointer' : 'not-allowed' }}
+        />
+        {isAuthenticated && draftPoolCount > 0 && ( 
+          <span className="cart-count">{draftPoolCount}</span>
+        )}
+      </div>
       <Container>
         <h3>Список карт</h3>
         <form className="find-button" onSubmit={handleSearch}>
@@ -127,13 +161,15 @@ const MapList: React.FC = () => {
                   />
                   <p>{map.title}</p>
                 </Link>
-                <Button
-                  variant="success"
-                  onClick={() => addToDraft(map.id)}
-                  className="mt-2"
-                >
-                  Добавить в пул карт
-                </Button>
+                {isAuthenticated && ( 
+                  <Button
+                    variant="success"
+                    onClick={() => addToDraft(map.id)}
+                    className="mt-2"
+                  >
+                    Добавить в пул карт
+                  </Button>
+                )}
               </Col>
             ))
           ) : (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loginUser, resetAuthStatus } from '../store/authSlice';
+import { loginUser, resetAuthStatus, setAuthenticated } from '../store/authSlice';
 import Header from '../components/Header';
 import './styles/AuthPage.css';
 
@@ -22,7 +22,21 @@ const AuthPage: React.FC = () => {
     dispatch(resetAuthStatus());
     dispatch(loginUser({ username: login, password }));
   };
-
+  useEffect(() => {
+    const checkAuth = () => {
+      const cookies = document.cookie.split('; ');
+      const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
+  
+      if (sessionCookie) {
+        dispatch(setAuthenticated(true));
+      } else {
+        dispatch(setAuthenticated(false));
+      }
+    };
+  
+    checkAuth();
+  }, [dispatch]);
+  
   useEffect(() => {
     if (authStatus === 'succeeded' && user) {
       navigate('/maps');

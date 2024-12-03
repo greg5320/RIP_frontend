@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import axiosInstance from '../modules/axios';
 
@@ -6,15 +6,16 @@ interface AuthState {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   user: any | null;
+  isAuthenticated: boolean;
 }
 
 const initialState: AuthState = {
   status: 'idle',
   error: null,
   user: null,
+  isAuthenticated: false,
 };
 
-// Асинхронный экшен для регистрации пользователя
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (userData: { username: string; password: string; email: string }, { rejectWithValue }) => {
@@ -27,20 +28,18 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// Асинхронный экшен для авторизации пользователя
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (userData: { username: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/api/users/login/', userData);
-      return response.data; // Возвращаем данные пользователя
+      return response.data; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Ошибка авторизации');
     }
   }
 );
 
-// Асинхронный экшен для выхода из системы
 export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, { rejectWithValue }) => {
@@ -52,13 +51,12 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-// Асинхронный экшен для получения текущего пользователя
 export const fetchCurrentUser = createAsyncThunk(
   'auth/fetchCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get('/api/users/profile/');
-      return response.data; // Возвращаем данные текущего пользователя
+      return response.data; 
     } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Ошибка при получении данных пользователя');
     }
@@ -69,11 +67,20 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // Экшен для сброса статуса авторизации
+    setAuthenticated: (state, action: PayloadAction<boolean>) => {
+      state.isAuthenticated = action.payload;
+    },
     resetAuthStatus: (state) => {
       state.status = 'idle';
       state.error = null;
     },
+    login: (state) => {
+      state.isAuthenticated = true;
+    },
+    logout: (state) => {
+      state.isAuthenticated = false;
+    },
+    
   },
   extraReducers: (builder) => {
     builder
@@ -121,7 +128,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { resetAuthStatus } = authSlice.actions;
+export const { resetAuthStatus, setAuthenticated, login, logout } = authSlice.actions;
 
 // Селекторы
 export const selectAuthStatus = (state: RootState) => state.auth.status;

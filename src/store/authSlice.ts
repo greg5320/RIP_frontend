@@ -1,83 +1,111 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 import axiosInstance from '../modules/axios';
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  is_superuser: boolean;
-  is_staff: boolean;
-  is_active: boolean;
-  date_joined: string;
-  last_login: string | null;
-  first_name: string;
-  last_name: string;
-}
-
 interface AuthState {
-  user: User | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
+  user: any | null;
 }
 
 const initialState: AuthState = {
-  user: null,
   status: 'idle',
   error: null,
+  user: null,
 };
 
-export const loginUser = createAsyncThunk(
-  'auth/login',
-  async (credentials: { username: string; password: string }) => {
-    const response = await axiosInstance.post('/api/users/login/', credentials);
-    return response.data; 
-  }
-);
+// Асинхронный экшен для регистрации пользователя
 export const registerUser = createAsyncThunk(
-  'auth/register',
-  async (credentials: { username: string; password: string; email: string }) => {
-    const response = await axiosInstance.post('/api/users/register/', credentials);
-    return response.data; 
+  'auth/registerUser',
+  async (userData: { username: string; password: string; email: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/api/users/register/', userData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'Ошибка регистрации');
+    }
   }
 );
 
+// Асинхронный экшен для авторизации пользователя
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (userData: { username: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/api/users/login/', userData);
+      return response.data; // Возвращаем данные пользователя
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'Ошибка авторизации');
+    }
+  }
+);
 
-export const fetchCurrentUser = createAsyncThunk('auth/me', async () => {
-  const response = await axiosInstance.get('/api/users/profile/'); 
-  return response.data;
-});
+// Асинхронный экшен для выхода из системы
+export const logoutUser = createAsyncThunk(
+  'auth/logoutUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      await axiosInstance.post('/api/users/logout/');
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'Ошибка при выходе из системы');
+    }
+  }
+);
+
+// Асинхронный экшен для получения текущего пользователя
+export const fetchCurrentUser = createAsyncThunk(
+  'auth/fetchCurrentUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get('/api/users/profile/');
+      return response.data; // Возвращаем данные текущего пользователя
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'Ошибка при получении данных пользователя');
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout: (state) => {
-      state.user = null;
+    // Экшен для сброса статуса авторизации
+    resetAuthStatus: (state) => {
+      state.status = 'idle';
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginUser.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.user = action.payload; 
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Ошибка входа';
-      })
       .addCase(registerUser.pending, (state) => {
         state.status = 'loading';
+        state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.status = 'succeeded';
-        state.user = action.payload;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Ошибка регистрации';
+        state.error = action.payload as string;
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.user = action.payload;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.status = 'idle';
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.error = action.payload as string;
       })
       .addCase(fetchCurrentUser.pending, (state) => {
         state.status = 'loading';
@@ -88,11 +116,16 @@ const authSlice = createSlice({
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Ошибка получения данных пользователя';
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { resetAuthStatus } = authSlice.actions;
+
+// Селекторы
+export const selectAuthStatus = (state: RootState) => state.auth.status;
+export const selectAuthError = (state: RootState) => state.auth.error;
+export const selectUser = (state: RootState) => state.auth.user;
 
 export default authSlice.reducer;

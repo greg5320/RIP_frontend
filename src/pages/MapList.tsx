@@ -11,7 +11,7 @@ import { BreadCrumbs } from '../components/BreadCrumbs';
 import { RootState } from '../store';
 import { setSearchTerm } from '../store/searchSlice';
 // import axios from 'axios';
-import axiosInstance from '../modules/axios'; 
+import axiosInstance from '../modules/axios';
 
 
 const MapList: React.FC = () => {
@@ -35,13 +35,13 @@ const MapList: React.FC = () => {
     try {
       const response = await axiosInstance.get(`/api/maps/`, {
         params: { title },
-        withCredentials: true, 
+        withCredentials: true,
       });
       console.log('Request URL:', axiosInstance.defaults.baseURL + '/api/maps/');
       const data = response.data;
-  
+
       if (data.maps) {
-        setMaps(data.maps); 
+        setMaps(data.maps);
         setError(null);
       } else {
         setMaps([]);
@@ -49,26 +49,37 @@ const MapList: React.FC = () => {
       }
     } catch (error) {
       console.warn('Ошибка при загрузке карт, используем моковые данные');
-      setMaps(filterMaps(title)); 
+      setMaps(filterMaps(title));
       setError('Ошибка при загрузке карт, используем моковые данные');
       console.error(error);
     }
   };
 
   useEffect(() => {
-    fetchMaps(searchTerm); 
+    fetchMaps(searchTerm);
   }, [searchTerm]);
 
- 
+
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
-    navigate(`/maps?title=${encodeURIComponent(searchTerm)}`); 
+    navigate(`/maps?title=${encodeURIComponent(searchTerm)}`);
     fetchMaps(searchTerm);
   };
 
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchTerm(event.target.value));
+  };
+
+  const addToDraft = async (mapId: number) => {
+    try {
+      const response = await axiosInstance.post('/api/maps/draft/', { map_id: mapId });
+      console.log(`Карта с ID ${mapId} успешно добавлена в пул заявок`, response.data);
+      alert('Карта успешно добавлена в пул заявок');
+    } catch (error) {
+      console.error(`Ошибка при добавлении карты с ID ${mapId} в пул заявок`, error);
+      alert('Произошла ошибка при добавлении карты');
+    }
   };
 
   return (
@@ -83,7 +94,7 @@ const MapList: React.FC = () => {
               <FormControl
                 type="text"
                 placeholder="Поиск по названию"
-                value={searchTerm} 
+                value={searchTerm}
                 onChange={handleInputChange}
                 className="mb-2"
               />
@@ -116,6 +127,13 @@ const MapList: React.FC = () => {
                   />
                   <p>{map.title}</p>
                 </Link>
+                <Button
+                  variant="success"
+                  onClick={() => addToDraft(map.id)}
+                  className="mt-2"
+                >
+                  Добавить в пул карт
+                </Button>
               </Col>
             ))
           ) : (

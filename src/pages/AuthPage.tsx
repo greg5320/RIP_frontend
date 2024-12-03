@@ -1,24 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/AuthPage.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loginUser } from '../store/authSlice';
+import { loginUser, resetAuthStatus } from '../store/authSlice';
 import Header from '../components/Header';
+import './styles/AuthPage.css';
 
 const AuthPage: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const authStatus = useAppSelector((state) => state.auth.status);
   const authError = useAppSelector((state) => state.auth.error);
+  const user = useAppSelector((state) => state.auth.user);
 
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    dispatch(resetAuthStatus());
     dispatch(loginUser({ username: login, password }));
   };
+
+  useEffect(() => {
+    if (authStatus === 'succeeded' && user) {
+      navigate('/maps');
+    }
+  }, [authStatus, user, navigate]);
 
   return (
     <>

@@ -177,3 +177,9 @@ body {
   }
 }
 
+
+.map-item .btn {
+  /* margin-top: 5px; */
+  width: 100%;
+  background-color: #00258C;
+}

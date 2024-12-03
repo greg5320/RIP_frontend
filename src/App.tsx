@@ -11,8 +11,16 @@ import MapPoolDetail from './pages/MapPoolDetails';
 import MapPoolListPage from './pages/MapPoolList';
 import ProfilePage from './pages/Profile';
 import RegistrationPage from './pages/RegistrationPage';
-
+import { fetchUserProfile } from './store/userSlice';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from './store/index';
 const App: React.FC = () => {
+  const dispatch: AppDispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchUserProfile());
+  }, [dispatch]);
   return (
     <BrowserRouter basename="/Starcraft-map-picker-frontend">
       <Routes>

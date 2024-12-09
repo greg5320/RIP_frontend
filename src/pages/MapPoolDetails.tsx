@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Image, Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/MapPoolList.css'; // Используем существующие стили
+import './styles/MapPoolList.css';
 import axiosInstance from '../modules/axios';
 import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { Map } from '../modules/mapApi';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface MapPool {
   id: number;
@@ -25,12 +26,11 @@ interface MapPool {
 }
 
 const MapPoolDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Получаем ID из маршрута
+  const { id } = useParams<{ id: string }>(); 
   const [mapPool, setMapPool] = useState<MapPool | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [playerLogin, setPlayerLogin] = useState<string>(''); 
-//   const navigate = useNavigate();
+  const [playerLogin, setPlayerLogin] = useState<string>('');
 
   const fetchMapPool = async () => {
     try {
@@ -90,7 +90,7 @@ const MapPoolDetails: React.FC = () => {
   const breadcrumbs = [
     { label: 'Карты', path: '/maps' },
     { label: 'Пул карт', path: '/map_pools' },
-    { label: `Заявка #${id}`, path: `/map_pools/${id}` },
+    { label: `Заявка №${id}`, path: `/map_pools/${id}` },
   ];
 
   if (error) {
@@ -109,12 +109,51 @@ const MapPoolDetails: React.FC = () => {
     );
   }
 
+  const sortedMaps = [...mapPool.maps].sort((a, b) => a.position - b.position);
+
+  const onDragEnd = async (result: any) => {
+    const { destination, source } = result;
+  
+    if (!destination) return; 
+  
+    if (destination.index !== source.index) {
+      const updatedMaps = Array.from(mapPool.maps);
+      const [movedMap] = updatedMaps.splice(source.index, 1);
+      updatedMaps.splice(destination.index, 0, movedMap); 
+  
+      const newPositionData = updatedMaps.map((mapEntry, index) => ({
+        id: mapEntry.map.id,
+        position: index + 1, 
+      }));
+  
+      try {
+        await axiosInstance.put(`/api/map_pools/${mapPool.id}/update_positions/`, {
+          positions: newPositionData,
+        });
+  
+        setMapPool((prev) =>
+          prev
+            ? {
+                ...prev,
+                maps: updatedMaps.map((mapEntry, index) => ({
+                  ...mapEntry,
+                  position: index + 1,
+                })),
+              }
+            : null
+        );
+      } catch (error) {
+        console.error('Ошибка при обновлении позиций карт:', error);
+      }
+    }
+  };
+
   return (
     <>
       <Header />
       <BreadCrumbs crumbs={breadcrumbs} />
       <Container>
-        <h3>Заявка #{mapPool.id}</h3>
+        <h3>Заявка №{mapPool.id}</h3>
         {successMessage && <p className="text-success">{successMessage}</p>}
 
         {mapPool.status === 'draft' && (
@@ -141,30 +180,59 @@ const MapPoolDetails: React.FC = () => {
           </>
         )}
 
-        <Row>
-          {mapPool.maps.map((mapEntry) => (
-            <Col key={mapEntry.map.id} xs={12} sm={6} md={4} lg={3}>
-              <div className="map-item">
-                <Image
-                  src={mapEntry.map.image_url}
-                  alt={mapEntry.map.title}
-                  fluid
-                  rounded
-                  className="map-pool-image"
-                />
-                <p>{mapEntry.map.title}</p>
-                {mapPool.status === 'draft' && (
-                  <Button
-                    className="custom-button"
-                    onClick={() => deleteMapFromDraft(mapEntry.map.id)}
-                  >
-                    Удалить карту
-                  </Button>
-                )}
-              </div>
-            </Col>
-          ))}
-        </Row>
+        {mapPool.status !== 'draft' && (
+          <div className="player-login-info">
+            <h5>Логин игрока: {mapPool.player_login}</h5>
+          </div>
+        )}
+
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="maps" direction="vertical">
+            {(provided) => (
+              <Row
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="map-pool-list"
+              >
+                {sortedMaps.map((mapEntry, index) => (
+                  <Draggable key={mapEntry.map.id} draggableId={mapEntry.map.id.toString()} index={index}>
+                    {(provided) => (
+                      <Col
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        lg={3}
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <div className="map-item">
+                          <Image
+                            src={mapEntry.map.image_url}
+                            alt={mapEntry.map.title}
+                            fluid
+                            rounded
+                            className="map-pool-image"
+                          />
+                          <p>{mapEntry.map.title}</p>
+                          {mapPool.status === 'draft' && (
+                            <Button
+                              className="custom-button"
+                              onClick={() => deleteMapFromDraft(mapEntry.map.id)}
+                            >
+                              Удалить карту
+                            </Button>
+                          )}
+                        </div>
+                      </Col>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </Row>
+            )}
+          </Droppable>
+        </DragDropContext>
       </Container>
     </>
   );

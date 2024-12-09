@@ -123,11 +123,12 @@ body {
   
   .filter-input {
     width: 200px;
+    height:35px;
   }
   
   .filter-button {
     margin-bottom: 2px;
-    height: 40px;
+    height: 35px;
     background-color: #00258C;
     color: white;
     border: none;
@@ -141,4 +142,27 @@ body {
   .id-index button{
     text-decoration: underline;
     background-color: Transparent
+  }
+
+  .player-login-info {
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+  }
+
+  .map-item {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .map-pool-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0;
+    overflow: hidden; 
+  }
+
+  .droppable-placeholder {
+    display: none;
   }

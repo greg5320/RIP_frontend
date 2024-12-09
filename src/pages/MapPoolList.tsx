@@ -8,6 +8,7 @@ import './styles/MapPoolList.css';
 import { RootState } from '../store';
 import axiosInstance from '../modules/axios';
 import Header from '../components/Header';
+import { BreadCrumbs } from '../components/BreadCrumbs';
 
 interface MapPool {
   id: number;
@@ -72,10 +73,15 @@ const MapPoolList: React.FC = () => {
     };
     fetchMapPools(filters);
   };
+  const breadcrumbs = [
+    { label: 'Карты', path: '/maps' },
+    { label: 'Пул карт', path: '/map_pools' },
+  ];
 
   return (
     <>
       <Header />
+      <BreadCrumbs crumbs={breadcrumbs} />
       <Container>
         <h3 className="mt-4">Список заявок</h3>
         {error && <Alert variant="danger">{error}</Alert>}

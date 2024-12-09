@@ -97,3 +97,48 @@ body {
     color: green;
     font-weight: bold;
   }
+
+  table {
+    color: white;
+    background-color: #222;
+  }
+  th, td {
+    text-align: center;
+    padding: 8px;
+  }
+
+  .filters-bar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  
+  .filter-input {
+    width: 200px;
+  }
+  
+  .filter-button {
+    margin-bottom: 2px;
+    height: 40px;
+    background-color: #00258C;
+    color: white;
+    border: none;
+    padding: 0 20px;
+  }
+  
+  .id-index{
+    text-decoration: underline;
+  }
+  
+  .id-index button{
+    text-decoration: underline;
+    background-color: Transparent
+  }

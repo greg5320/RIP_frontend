@@ -35,7 +35,7 @@ const App: React.FC = () => {
         <Route path="/404" element={<Page404 />} />
         <Route path="/403" element={<Page403 />} />
         <Route path="/map_pools" element={<MapPoolList />} />
-        <Route path="/map_pools/1" element={<MapPoolDetail />} />
+        <Route path="/map_pools/:id" element={<MapPoolDetail />} />
       </Routes>
     </BrowserRouter>
   );

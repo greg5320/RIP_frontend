@@ -55,9 +55,10 @@ export const fetchCurrentUser = createAsyncThunk(
   'auth/fetchCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get('/api/users/profile/');
-      return response.data; 
+      const response = await axiosInstance.put('/api/users/profile/', {}, { withCredentials: true });
+      return response.data;
     } catch (error: any) {
+      console.log('Ошибка при получении данных профиля:', error);
       return rejectWithValue(error.response?.data || 'Ошибка при получении данных пользователя');
     }
   }

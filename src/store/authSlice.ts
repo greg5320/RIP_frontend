@@ -7,6 +7,7 @@ interface AuthState {
   error: string | null;
   user: any | null;
   isAuthenticated: boolean;
+  is_staff: boolean;
 }
 
 const initialState: AuthState = {
@@ -14,6 +15,7 @@ const initialState: AuthState = {
   error: null,
   user: null,
   isAuthenticated: false,
+  is_staff: false
 };
 
 export const registerUser = createAsyncThunk(
@@ -55,11 +57,14 @@ export const fetchCurrentUser = createAsyncThunk(
   'auth/fetchCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
+      const cookies = document.cookie;
+      if (!cookies.includes('session_id=')) {
+        throw new Error('Нет Session ID');
+      }
       const response = await axiosInstance.put('/api/users/profile/', {}, { withCredentials: true });
       return response.data;
     } catch (error: any) {
-      console.log('Ошибка при получении данных профиля:', error);
-      return rejectWithValue(error.response?.data || 'Ошибка при получении данных пользователя');
+      return rejectWithValue(error.response?.data || '');
     }
   }
 );
@@ -103,6 +108,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
@@ -111,6 +117,7 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.status = 'idle';
+        state.isAuthenticated = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -121,6 +128,7 @@ const authSlice = createSlice({
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload;
+        state.is_staff = action.payload.is_staff;
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.status = 'failed';
@@ -129,9 +137,10 @@ const authSlice = createSlice({
   },
 });
 
+
 export const { resetAuthStatus, setAuthenticated, login, logout } = authSlice.actions;
 
-// Селекторы
+
 export const selectAuthStatus = (state: RootState) => state.auth.status;
 export const selectAuthError = (state: RootState) => state.auth.error;
 export const selectUser = (state: RootState) => state.auth.user;

@@ -4,31 +4,30 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api/index'; // Импортируем сгенерированный API
-import { logoutUser } from '../store/authSlice'; // Redux-логика логаута
+import { api } from '../api/index'; 
+import { logoutUser } from '../store/authSlice'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Header: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
-
+  const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const [username, setUsername] = React.useState<string | null>(null);
 
-  // Подгружаем данные пользователя
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         if (user) {
           const response = await api.users.usersProfileUpdate({
             withCredentials: true,
-          }); // Метод PUT для получения профиля
+          }); 
           const myData = response.data;
           setUsername(myData.username);
         }
       } catch (error) {
         console.error('Ошибка при получении профиля:', error);
-        setUsername(null); // В случае ошибки обнуляем username
+        setUsername(null); 
       }
     };
 
@@ -37,19 +36,17 @@ const Header: React.FC = () => {
     }
   }, [user, username]);
 
-  // Обработчик выхода из системы
   const handleLogout = async () => {
     try {
-      await api.users.usersLogoutCreate(); // Запрос на выход
-      dispatch(logoutUser()); // Логика логаута через Redux
-      setUsername(null); // Сбрасываем username
-      navigate('/login'); // Перенаправляем на страницу логина
+      await api.users.usersLogoutCreate();
+      dispatch(logoutUser()); 
+      setUsername(null); 
+      navigate('/login');
     } catch (error) {
       console.error('Ошибка при выходе:', error);
     }
   };
 
-  // Обработчик перехода на страницу логина
   const handleLoginClick = () => {
     navigate('/login', { replace: true });
   };
@@ -66,7 +63,13 @@ const Header: React.FC = () => {
             <LinkContainer to="/maps">
               <Nav.Link>Карты</Nav.Link>
             </LinkContainer>
+            {isStaff && ( 
+              <LinkContainer to="/maps/edit">
+                <Nav.Link>Список карт</Nav.Link>
+              </LinkContainer>
+            )}
           </Nav>
+          
           <Nav className="ms-auto">
             {username ? (
               <NavDropdown title={username} id="basic-nav-dropdown">

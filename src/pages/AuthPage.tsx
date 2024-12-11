@@ -13,7 +13,6 @@ const AuthPage: React.FC = () => {
   const authStatus = useAppSelector((state) => state.auth.status);
   const authError = useAppSelector((state) => state.auth.error);
   const user = useAppSelector((state) => state.auth.user);
-
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
@@ -22,21 +21,22 @@ const AuthPage: React.FC = () => {
     dispatch(resetAuthStatus());
     dispatch(loginUser({ username: login, password }));
   };
+
   useEffect(() => {
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
       const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
-  
+
       if (sessionCookie) {
         dispatch(setAuthenticated(true));
       } else {
         dispatch(setAuthenticated(false));
       }
     };
-  
+
     checkAuth();
   }, [dispatch]);
-  
+
   useEffect(() => {
     if (authStatus === 'succeeded' && user) {
       navigate('/maps');
@@ -78,7 +78,9 @@ const AuthPage: React.FC = () => {
               </Form>
 
               {authStatus === 'loading' && <p>Загрузка...</p>}
-              {authError && <p style={{ color: 'red' }}>{authError}</p>}
+
+              
+              {authError}
 
               <div className="mt-3 text-center">
                 <p>

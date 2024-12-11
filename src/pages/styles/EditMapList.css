@@ -1,0 +1,57 @@
+.edit-map-list1 {
+    margin-top: 20px;
+    color: #ffffff; /* Основной цвет текста */
+    font-family: 'Roboto', sans-serif; /* Используемый шрифт */
+}
+
+.search-form1 {
+    margin-bottom: 20px;
+}
+
+.search-button1 {
+    margin-bottom: 9px;
+    background-color: #00258C;
+}
+
+.map-container1 {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.map-row1 {
+    display: flex;
+    align-items: center;
+    background-color: #343a40; /* Тёмный фон */
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.map-image1 {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-right: 20px;
+}
+
+.map-details1 {
+    flex-grow: 1;
+    font-size: 1.2rem;
+    color: #f8f9fa; /* Светлый текст */
+}
+
+.map-actions1 {
+    display: flex;
+    gap: 10px;
+}
+
+.map-actions1 .btn-primary {
+    background-color: #00258C;
+    border-color: #007bff;
+    height: 38px;
+}
+
+.map-actions1 .btn-danger {
+    background-color: #950f1c;
+    border-color: #dc3545;
+}

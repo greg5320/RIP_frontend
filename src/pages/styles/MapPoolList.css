@@ -44,7 +44,8 @@ body {
   }
   
   button {
-    background-color: #ff0000;
+    background-color: #950f1c;
+    border-color: #dc3545;
     border: none;
     padding: 8px 16px;
     color: white;
@@ -165,4 +166,31 @@ body {
 
   .droppable-placeholder {
     display: none;
+  }
+
+  .map-index {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ccc;
+    min-width: 30px; 
+    text-align: right; 
+  }
+  .map-index-draft {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ccc;
+    min-width: 30px; 
+    text-align: right; 
+    margin-bottom: 100px;
+  }
+
+  .map-item-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+  }
+
+  .nav-link.map-list {
+    color: white;
+    text-decoration: none !important;
   }

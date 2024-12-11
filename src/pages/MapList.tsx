@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Button, FormControl, Container, Row, Col, Image } from 'react-bootstrap';
-import { FaShoppingCart } from 'react-icons/fa'; 
+import { FaShoppingCart } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/MapList.css';
 import { Map } from '../modules/mapApi';
@@ -12,16 +12,19 @@ import { BreadCrumbs } from '../components/BreadCrumbs';
 import { RootState } from '../store';
 import { setSearchTerm } from '../store/searchSlice';
 import axiosInstance from '../modules/axios';
-
+import { fetchCurrentUser } from '../store/authSlice';
+import type { AppDispatch } from '../store/index';
+import { setAuthenticated } from '../store/authSlice';
 const MapList: React.FC = () => {
   const [maps, setMaps] = useState<Map[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [draftPoolCount, setDraftPoolCount] = useState<number>(0); 
+  const [draftPoolCount, setDraftPoolCount] = useState<number>(0);
   const defaultImageUrl = 'http://127.0.0.1:9000/mybucket/map_not_found.png';
   const navigate = useNavigate();
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated); 
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const filterMaps = (title: string) => {
     if (title) {
@@ -38,7 +41,6 @@ const MapList: React.FC = () => {
         params: { title },
         withCredentials: true,
       });
-      console.log('Request URL:', axiosInstance.defaults.baseURL + '/api/maps/');
       const data = response.data;
 
       if (data.maps) {
@@ -52,7 +54,6 @@ const MapList: React.FC = () => {
       console.warn('Ошибка при загрузке карт, используем моковые данные');
       setMaps(filterMaps(title));
       setError('Ошибка при загрузке карт, используем моковые данные');
-      console.error(error);
     }
   };
 
@@ -60,9 +61,9 @@ const MapList: React.FC = () => {
     try {
       const response = await axiosInstance.get(`/api/maps/`);
       const data = response.data;
-      
+
       if (data.draft_pool_count !== undefined) {
-        setDraftPoolCount(data.draft_pool_count); 
+        setDraftPoolCount(data.draft_pool_count);
       }
     } catch (error) {
       console.error('Ошибка при загрузке информации о пуле карт', error);
@@ -71,10 +72,23 @@ const MapList: React.FC = () => {
 
   useEffect(() => {
     fetchMaps(searchTerm);
+    dispatch(fetchCurrentUser());
+    const checkAuth = () => {
+      const cookies = document.cookie.split('; ');
+      const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
+  
+      if (sessionCookie) {
+        dispatch(setAuthenticated(true));
+      } else {
+        dispatch(setAuthenticated(false));
+      }
+    };
+  
+    checkAuth();
     if (isAuthenticated) {
-      fetchDraftPoolInfo(); 
+      fetchDraftPoolInfo();
     }
-  }, [searchTerm, isAuthenticated]);
+  }, [searchTerm, isAuthenticated, dispatch]);
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -116,12 +130,11 @@ const MapList: React.FC = () => {
           className="cart-icon"
           style={{ cursor: isAuthenticated ? 'pointer' : 'not-allowed' }}
         />
-        {isAuthenticated && draftPoolCount > 0 && ( 
+        {isAuthenticated && !isStaff && draftPoolCount > 0 && (
           <span className="cart-count">{draftPoolCount}</span>
         )}
       </div>
       <Container>
-        <h3>Список карт</h3>
         <form className="find-button" onSubmit={handleSearch}>
           <Row className="justify-content-center align-items-center">
             <Col xs={12} sm={8} md={6} lg={4} className="search-field">
@@ -161,14 +174,14 @@ const MapList: React.FC = () => {
                   />
                   <p>{map.title}</p>
                 </Link>
-                {isAuthenticated && ( 
-                  <Button
-                    variant="success"
-                    onClick={() => addToDraft(map.id)}
-                    className="mt-2"
-                  >
-                    Добавить в пул карт
-                  </Button>
+                {isAuthenticated &&(
+                <Button
+                  variant="success"
+                  onClick={() => addToDraft(map.id)}
+                  className="mt-2"
+                >
+                  Добавить в пул карт
+                </Button>
                 )}
               </Col>
             ))

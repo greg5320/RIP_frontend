@@ -8,6 +8,11 @@ import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { Map } from '../modules/mapApi';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { AppDispatch } from '../store';
+import { useDispatch,useSelector } from 'react-redux';
+import { setAuthenticated } from '../store/authSlice';
+import { fetchCurrentUser } from '../store/authSlice';
+import { RootState } from '../store';
 
 interface MapPool {
   id: number;
@@ -31,7 +36,9 @@ const MapPoolDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [playerLogin, setPlayerLogin] = useState<string>('');
-
+  const dispatch = useDispatch<AppDispatch>();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  // const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const fetchMapPool = async () => {
     try {
       const response = await axiosInstance.get(`/api/map_pools/${id}/`, { withCredentials: true });
@@ -45,7 +52,20 @@ const MapPoolDetails: React.FC = () => {
 
   useEffect(() => {
     fetchMapPool();
-  }, [id]);
+    dispatch(fetchCurrentUser());
+    const checkAuth = () => {
+      const cookies = document.cookie.split('; ');
+      const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
+  
+      if (sessionCookie) {
+        dispatch(setAuthenticated(true));
+      } else {
+        dispatch(setAuthenticated(false));
+      }
+    };
+  
+    checkAuth();
+  }, [isAuthenticated, dispatch,id]);
 
   const deleteMapFromDraft = async (mapId: number) => {
     try {
@@ -186,56 +206,87 @@ const MapPoolDetails: React.FC = () => {
           </div>
         )}
 
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="maps" direction="vertical">
-            {(provided) => (
-              <Row
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="map-pool-list"
+        {mapPool.status === 'draft' ? (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="maps" direction="vertical">
+              {(provided) => (
+                <Row
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="map-pool-list"
+                >
+                  {sortedMaps.map((mapEntry, index) => (
+                    <Draggable key={mapEntry.map.id} draggableId={mapEntry.map.id.toString()} index={index}>
+                      {(provided) => (
+                        <Col
+                          xs={12}
+                          sm={6}
+                          md={4}
+                          lg={3}
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <div className="map-item-container">
+                            <p className="map-index-draft">{index + 1}</p> 
+                            <div className="map-item">
+                              <Image
+                                src={mapEntry.map.image_url}
+                                alt={mapEntry.map.title}
+                                fluid
+                                rounded
+                                className="map-pool-image"
+                              />
+                              <p>{mapEntry.map.title}</p>
+                              <Button
+                                className="custom-button"
+                                onClick={() => deleteMapFromDraft(mapEntry.map.id)}
+                              >
+                                Удалить карту
+                              </Button>
+                            </div>
+                          </div>
+                        </Col>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </Row>
+              )}
+            </Droppable>
+          </DragDropContext>
+        ) : (
+          <Row className="map-pool-list">
+            {sortedMaps.map((mapEntry, index) => (
+              <Col
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                key={mapEntry.map.id}
               >
-                {sortedMaps.map((mapEntry, index) => (
-                  <Draggable key={mapEntry.map.id} draggableId={mapEntry.map.id.toString()} index={index}>
-                    {(provided) => (
-                      <Col
-                        xs={12}
-                        sm={6}
-                        md={4}
-                        lg={3}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <div className="map-item">
-                          <Image
-                            src={mapEntry.map.image_url}
-                            alt={mapEntry.map.title}
-                            fluid
-                            rounded
-                            className="map-pool-image"
-                          />
-                          <p>{mapEntry.map.title}</p>
-                          {mapPool.status === 'draft' && (
-                            <Button
-                              className="custom-button"
-                              onClick={() => deleteMapFromDraft(mapEntry.map.id)}
-                            >
-                              Удалить карту
-                            </Button>
-                          )}
-                        </div>
-                      </Col>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </Row>
-            )}
-          </Droppable>
-        </DragDropContext>
+                <div className="map-item-container">
+                  <p className="map-index">{index + 1}</p> 
+                  <div className="map-item">
+                    <Image
+                      src={mapEntry.map.image_url}
+                      alt={mapEntry.map.title}
+                      fluid
+                      rounded
+                      className="map-pool-image"
+                    />
+                    <p>{mapEntry.map.title}</p>
+                  </div>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        )}
       </Container>
     </>
   );
 };
+
+
 
 export default MapPoolDetails;

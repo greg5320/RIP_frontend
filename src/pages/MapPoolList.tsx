@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Table, Container, Alert, Form, Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
@@ -9,6 +9,11 @@ import { RootState } from '../store';
 import axiosInstance from '../modules/axios';
 import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
+import { setFilters } from '../store/filterSlice';
+import { AppDispatch } from '../store';
+import { setAuthenticated } from '../store/authSlice';
+import { fetchCurrentUser } from '../store/authSlice';
+
 
 interface MapPool {
   id: number;
@@ -21,12 +26,10 @@ interface MapPool {
 const MapPoolList: React.FC = () => {
   const [mapPools, setMapPools] = useState<MapPool[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>('');
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const { status, startDate, endDate } = useSelector((state: RootState) => state.filters);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const navigate = useNavigate();
-
+  const dispatch = useDispatch<AppDispatch>();
   const statusTranslations: { [key: string]: string } = {
     completed: 'Завершено',
     rejected: 'Отклонено',
@@ -46,7 +49,9 @@ const MapPoolList: React.FC = () => {
       const sortedData = response.data.sort((a: MapPool, b: MapPool) => {
         if (a.status === 'draft' && b.status !== 'draft') return -1;
         if (a.status !== 'draft' && b.status === 'draft') return 1;
-        return 0;
+        if (a.status === 'submitted' && b.status !== 'submitted') return -1;
+        if (a.status !== 'submitted' && b.status === 'submitted') return 1;
+        return new Date(a.creation_date).getTime() - new Date(b.creation_date).getTime();
       });
 
       setMapPools(sortedData);
@@ -58,21 +63,40 @@ const MapPoolList: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchMapPools();
-    } else {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
+    fetchMapPools({
+      status_query: status,
+      start_date: startDate ? startDate : undefined,
+      end_date: endDate ? endDate : undefined,
+    });
+    dispatch(fetchCurrentUser());
+    const checkAuth = () => {
+      const cookies = document.cookie.split('; ');
+      const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
+  
+      if (sessionCookie) {
+        dispatch(setAuthenticated(true));
+      } else {
+        dispatch(setAuthenticated(false));
+      }
+    };
+  
+    checkAuth();
+  }, [status, startDate, endDate,isAuthenticated, dispatch]);
 
   const handleSearch = () => {
     const filters = {
       status_query: status,
-      start_date: startDate ? startDate.toISOString().split('T')[0] : undefined,
-      end_date: endDate ? endDate.toISOString().split('T')[0] : undefined,
+      start_date: startDate ? new Date(startDate).toISOString().split('T')[0] : undefined,
+      end_date: endDate ? new Date(endDate).toISOString().split('T')[0] : undefined,
     };
+    dispatch(setFilters({
+      status: status,
+      startDate: startDate ? new Date(startDate).toISOString().split('T')[0] : null,
+      endDate: endDate ? new Date(endDate).toISOString().split('T')[0] : null,
+    }));
     fetchMapPools(filters);
   };
+
   const breadcrumbs = [
     { label: 'Карты', path: '/maps' },
     { label: 'Пул карт', path: '/map_pools' },
@@ -90,7 +114,7 @@ const MapPoolList: React.FC = () => {
             <Form.Label>Статус</Form.Label>
             <Form.Select
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => dispatch(setFilters({ ...{ status: e.target.value }, startDate, endDate }))}
               className="filter-input"
             >
               <option value="">Все</option>
@@ -103,22 +127,22 @@ const MapPoolList: React.FC = () => {
           <Form.Group className="filter-group">
             <Form.Label>Дата оформления с</Form.Label>
             <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              dateFormat="yyyy-MM-dd"
+              selected={startDate ? new Date(startDate) : null}
+              onChange={(date) => dispatch(setFilters({ ...{ status, startDate: date ? date.toISOString().split('T')[0] : null, endDate } }))}
+              dateFormat="dd.MM.yyyy"
               className="filter-input"
             />
           </Form.Group>
           <Form.Group className="filter-group">
             <Form.Label>Дата оформления по</Form.Label>
             <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              dateFormat="yyyy-MM-dd"
+              selected={endDate ? new Date(endDate) : null}
+              onChange={(date) => dispatch(setFilters({ ...{ status, startDate, endDate: date ? date.toISOString().split('T')[0] : null } }))}
+              dateFormat="dd.MM.yyyy"
               className="filter-input"
             />
           </Form.Group>
-          <Button className="filter-button" onClick={handleSearch}>
+          <Button className="search-button" onClick={handleSearch}>
             Показать
           </Button>
         </div>

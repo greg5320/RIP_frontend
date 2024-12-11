@@ -15,8 +15,13 @@ const initialState: UserState = {
 
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
-  async () => {
-    const response = await axiosInstance.get('/api/users/profile/'); 
+  async (_, { getState }) => {
+    const state = getState() as any;
+    const isAuthenticated = state.auth.isAuthenticated;
+    if (!isAuthenticated) {
+      return Promise.reject('User not authenticated');
+    }
+    const response = await axiosInstance.put('/api/users/profile/', {}, { withCredentials: true });
     return response.data; 
   }
 );

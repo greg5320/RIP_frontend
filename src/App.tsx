@@ -5,7 +5,7 @@ import MainPage from './pages/MainPage';
 import AuthPage from './pages/AuthPage';
 import Page403 from './pages/403';
 import Page404 from './pages/404';
-import EditMapPage from './pages/EditMapPage';
+import EditMapPage from './pages/EditMapList';
 import MapListTable from './pages/MapListTable';
 import MapPoolDetail from './pages/MapPoolDetails';
 import MapPoolList from './pages/MapPoolList';

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Row, Col, FormControl } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux'; 
-import { setSearchTerm } from '../store/searchMapsSlice';  
+import { useDispatch, useSelector } from 'react-redux';
+import { setSearchTerm } from '../store/searchMapsSlice';
 import axiosInstance from '../modules/axios';
 import './styles/EditMapList.css';
 import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
+import { RootState } from '../store';
 
 interface Map {
   id: number;
@@ -16,9 +17,10 @@ interface Map {
 
 const EditMapList: React.FC = () => {
   const [maps, setMaps] = useState<Map[]>([]);
-  const searchTerm = useSelector((state: any) => state.searchMap.searchTerm); 
+  const searchTerm = useSelector((state: RootState) => state.searchMap.searchTerm);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [localSearchTerm, setLocalSearchTerm] = useState<string>(searchTerm);
 
   const fetchMaps = async (title: string = '') => {
     try {
@@ -48,19 +50,19 @@ const EditMapList: React.FC = () => {
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
-    fetchMaps(searchTerm); 
+    dispatch(setSearchTerm(localSearchTerm));
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setSearchTerm(event.target.value));
+    setLocalSearchTerm(event.target.value);
   };
 
   useEffect(() => {
-    fetchMaps(searchTerm);  
-  }, [searchTerm]); 
+    setLocalSearchTerm(searchTerm); 
+    fetchMaps(searchTerm);
+  }, [searchTerm]);
 
   const breadcrumbs = [
-    { label: 'Карты', path: '/maps' },
     { label: 'Список карт', path: '/edit' },
   ];
 
@@ -75,8 +77,8 @@ const EditMapList: React.FC = () => {
               <FormControl
                 type="text"
                 placeholder="Поиск по названию"
-                value={searchTerm}
-                onChange={handleInputChange}  
+                value={localSearchTerm}
+                onChange={handleInputChange}
                 className="mb-2"
               />
             </Col>

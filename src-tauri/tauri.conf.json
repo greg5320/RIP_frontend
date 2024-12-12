@@ -5,7 +5,7 @@
   "identifier": "com.github.greg5320.starcraft-map-picker-frontend",  
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:3000",
+    "devUrl": "http://localhost:3000/Starcraft-map-picker-frontend",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },

@@ -15,15 +15,17 @@ import axiosInstance from '../modules/axios';
 import { fetchCurrentUser } from '../store/authSlice';
 import type { AppDispatch } from '../store/index';
 import { setAuthenticated } from '../store/authSlice';
+
 const MapList: React.FC = () => {
   const [maps, setMaps] = useState<Map[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [draftPoolCount, setDraftPoolCount] = useState<number>(0);
+  const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
+  const [localSearchTerm, setLocalSearchTerm] = useState<string>(searchTerm);
   const defaultImageUrl = 'http://127.0.0.1:9000/mybucket/map_not_found.png';
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const isStaff = useSelector((state: RootState) => state.auth.is_staff);
-  const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
   const dispatch = useDispatch<AppDispatch>();
 
   const filterMaps = (title: string) => {
@@ -71,33 +73,36 @@ const MapList: React.FC = () => {
   };
 
   useEffect(() => {
+    setLocalSearchTerm(searchTerm); 
     fetchMaps(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
     dispatch(fetchCurrentUser());
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
       const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
-  
+
       if (sessionCookie) {
         dispatch(setAuthenticated(true));
       } else {
         dispatch(setAuthenticated(false));
       }
     };
-  
+
     checkAuth();
     if (isAuthenticated) {
       fetchDraftPoolInfo();
     }
-  }, [searchTerm, isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch]);
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
-    navigate(`/maps?title=${encodeURIComponent(searchTerm)}`);
-    fetchMaps(searchTerm);
+    dispatch(setSearchTerm(localSearchTerm));
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setSearchTerm(event.target.value));
+    setLocalSearchTerm(event.target.value); 
   };
 
   const handleCartClick = () => {
@@ -141,7 +146,7 @@ const MapList: React.FC = () => {
               <FormControl
                 type="text"
                 placeholder="Поиск по названию"
-                value={searchTerm}
+                value={localSearchTerm}
                 onChange={handleInputChange}
                 className="mb-2"
               />

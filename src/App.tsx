@@ -22,7 +22,7 @@ const App: React.FC = () => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
   return (
-    <BrowserRouter basename="/Starcraft-map-picker-frontend">
+    <BrowserRouter basename="/">
       <Routes>
         <Route path="/maps/:id" element={<MapDetails />} />
         <Route path="/maps" element={<MapList />} />

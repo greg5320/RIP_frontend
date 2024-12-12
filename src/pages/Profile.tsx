@@ -24,7 +24,7 @@ const ProfilePage: React.FC = () => {
         setProfile(response.data);
       } catch (error) {
         console.error('Ошибка при загрузке профиля:', error);
-        navigate('/login'); // Перенаправляем на страницу логина, если профиль недоступен
+        navigate('/login');
       }
     };
 

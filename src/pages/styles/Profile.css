@@ -19,7 +19,6 @@ body {
     text-align: center;
     font-size: 2.2em;
     margin-bottom: 20px;
-    color: #00d4ff;
   }
   
   .profile-info {
@@ -38,7 +37,7 @@ body {
   }
   
   .profile-item strong {
-    color: #00d4ff;
+    color: white;
   }
   
   .password-reset {
@@ -49,7 +48,7 @@ body {
     text-align: center;
     font-size: 1.6em;
     margin-bottom: 20px;
-    color: #00d4ff;
+    color: white;
   }
   
   .password-input {
@@ -72,9 +71,10 @@ body {
     width: 100%;
     padding: 12px;
     font-size: 1em;
-    background-color: #00d4ff;
-    color: #1a1a1a;
+    background-color: #00258C;
+    color: white;
     border: none;
+    border-color: #007bff;
     border-radius: 6px;
     cursor: pointer;
     text-align: center;
@@ -83,7 +83,7 @@ body {
   }
   
   .reset-password-button:hover {
-    background-color: #00b0e6;
+    background-color: #0d6efd;
   }
   
   .message {

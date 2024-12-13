@@ -1,0 +1,119 @@
+/* styles/EditMap.css */
+
+.edit-map {
+    margin-top: 30px;
+    color: #ffffff;
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  .edit-map h2 {
+    color: #f8f9fa;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .edit-map .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .edit-map .form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .edit-map .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .edit-map .form-group label {
+    color: #adb5bd;
+    font-size: 1rem;
+  }
+  
+  .edit-map .form-control {
+    background-color: #212529;
+    color: #f8f9fa;
+    border: 1px solid #343a40;
+  }
+  
+  .edit-map .form-control:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 0.2rem rgba(0, 37, 140, 0.25);
+  }
+  
+  .edit-map .image-section {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  
+  .edit-map .image-preview {
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border: 1px solid #343a40;
+    border-radius: 8px;
+  }
+  
+  .edit-map .large-fields {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .edit-map .btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    
+  }
+  
+  .edit-map .btn-primary {
+    background-color: #00258c;
+    border-color: #007bff;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  
+  .edit-map .btn-primary:hover {
+    background-color: #0039cc;
+    border-color: #0039cc;
+  }
+  
+  .edit-map .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transition: background-color 0.3s, border-color 0.3s;
+    margin-top: 1%;
+  }
+  
+  .edit-map .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+  }
+  
+  textarea.form-control {
+    resize: none;
+  }
+  
+  .map-image-container {
+  text-align: center;
+  width: 100%;
+  max-height: 300px;
+  overflow: hidden;
+}
+
+.map-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+

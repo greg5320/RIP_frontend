@@ -57,14 +57,37 @@ const EditMapList: React.FC = () => {
     setLocalSearchTerm(event.target.value);
   };
 
+  const handleAddMap = async () => {
+    try {
+      const response = await axiosInstance.post('/api/maps/', {
+        "title": "Новая карта",
+        "players": "",
+        "tileset": "",
+        "status": "active",
+        "description": "",
+        "overview": "",
+        "image_url":"http://127.0.0.1:9000/mybucket/map_not_found.png"
+    },
+      {
+        headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,});
+      const newMapId = response.data.id;
+      navigate(`/maps/edit/${newMapId}`);
+    } catch (error) {
+      console.error('Ошибка при создании карты', error);
+      alert('Ошибка при создании новой карты.');
+    }
+  }
+    
+
   useEffect(() => {
-    setLocalSearchTerm(searchTerm); 
+    setLocalSearchTerm(searchTerm);
     fetchMaps(searchTerm);
   }, [searchTerm]);
 
-  const breadcrumbs = [
-    { label: 'Список карт', path: '/edit' },
-  ];
+  const breadcrumbs = [{ label: 'Список карт', path: '/edit' }];
 
   return (
     <>
@@ -94,27 +117,15 @@ const EditMapList: React.FC = () => {
           {maps.length > 0 ? (
             maps.map((map) => (
               <div key={map.id} className="map-row1">
-                <img
-                  src={map.image_url}
-                  alt={map.title}
-                  className="map-image1"
-                />
+                <img src={map.image_url} alt={map.title} className="map-image1" />
                 <div className="map-details1">
                   <h5>{map.title}</h5>
                 </div>
                 <div className="map-actions1">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleEdit(map.id)}
-                  >
+                  <Button variant="primary" size="sm" onClick={() => handleEdit(map.id)}>
                     Редактировать
                   </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(map.id)}
-                  >
+                  <Button variant="danger" size="sm" onClick={() => handleDelete(map.id)}>
                     Удалить
                   </Button>
                 </div>
@@ -124,6 +135,12 @@ const EditMapList: React.FC = () => {
             <p>Нет доступных карт для редактирования.</p>
           )}
         </Row>
+
+        <div className="text-center mt-4">
+          <Button variant="success" onClick={handleAddMap}>
+            Добавить карту
+          </Button>
+        </div>
       </Container>
     </>
   );

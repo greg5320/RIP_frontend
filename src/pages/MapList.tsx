@@ -27,7 +27,8 @@ const MapList: React.FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const dispatch = useDispatch<AppDispatch>();
-
+  
+  const sortedMaps = maps.sort((a, b) => a.title.localeCompare(b.title));
   const filterMaps = (title: string) => {
     if (title) {
       return mockMaps.filter((map) =>
@@ -159,8 +160,8 @@ const MapList: React.FC = () => {
           </Row>
         </form>
         <Row className="map-container mt-4">
-          {maps.length > 0 ? (
-            maps.map((map) => (
+          {sortedMaps.length > 0 ? (
+            sortedMaps.map((map) => (
               <Col
                 xs={12}
                 sm={6}
@@ -179,14 +180,14 @@ const MapList: React.FC = () => {
                   />
                   <p>{map.title}</p>
                 </Link>
-                {isAuthenticated &&(
-                <Button
-                  variant="success"
-                  onClick={() => addToDraft(map.id)}
-                  className="mt-2"
-                >
-                  Добавить в пул карт
-                </Button>
+                {isAuthenticated && (
+                  <Button
+                    variant="success"
+                    onClick={() => addToDraft(map.id)}
+                    className="mt-2"
+                  >
+                    Добавить в пул карт
+                  </Button>
                 )}
               </Col>
             ))

@@ -11,9 +11,7 @@ import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { setFilters } from '../store/filterSlice';
 import { AppDispatch } from '../store';
-import { setAuthenticated } from '../store/authSlice';
-import { fetchCurrentUser } from '../store/authSlice';
-
+import { setAuthenticated, fetchCurrentUser } from '../store/authSlice';
 
 interface MapPool {
   id: number;
@@ -68,20 +66,29 @@ const MapPoolList: React.FC = () => {
       start_date: startDate ? startDate : undefined,
       end_date: endDate ? endDate : undefined,
     });
+    const intervalId = setInterval(() => {
+      fetchMapPools({
+        status_query: status,
+        start_date: startDate ? startDate : undefined,
+        end_date: endDate ? endDate : undefined,
+      });
+    }, 2000); 
+
     dispatch(fetchCurrentUser());
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
       const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
-  
+
       if (sessionCookie) {
         dispatch(setAuthenticated(true));
       } else {
         dispatch(setAuthenticated(false));
       }
     };
-  
     checkAuth();
-  }, [status, startDate, endDate,isAuthenticated, dispatch]);
+
+    return () => clearInterval(intervalId); 
+  }, [status, startDate, endDate, isAuthenticated, dispatch]);
 
   const handleSearch = () => {
     const filters = {
@@ -89,11 +96,13 @@ const MapPoolList: React.FC = () => {
       start_date: startDate ? new Date(startDate).toISOString().split('T')[0] : undefined,
       end_date: endDate ? new Date(endDate).toISOString().split('T')[0] : undefined,
     };
-    dispatch(setFilters({
-      status: status,
-      startDate: startDate ? new Date(startDate).toISOString().split('T')[0] : null,
-      endDate: endDate ? new Date(endDate).toISOString().split('T')[0] : null,
-    }));
+    dispatch(
+      setFilters({
+        status: status,
+        startDate: startDate ? new Date(startDate).toISOString().split('T')[0] : null,
+        endDate: endDate ? new Date(endDate).toISOString().split('T')[0] : null,
+      })
+    );
     fetchMapPools(filters);
   };
 
@@ -114,7 +123,9 @@ const MapPoolList: React.FC = () => {
             <Form.Label>Статус</Form.Label>
             <Form.Select
               value={status}
-              onChange={(e) => dispatch(setFilters({ ...{ status: e.target.value }, startDate, endDate }))}
+              onChange={(e) =>
+                dispatch(setFilters({ ...{ status: e.target.value }, startDate, endDate }))
+              }
               className="filter-input"
             >
               <option value="">Все</option>
@@ -128,7 +139,17 @@ const MapPoolList: React.FC = () => {
             <Form.Label>Дата оформления с</Form.Label>
             <DatePicker
               selected={startDate ? new Date(startDate) : null}
-              onChange={(date) => dispatch(setFilters({ ...{ status, startDate: date ? date.toISOString().split('T')[0] : null, endDate } }))}
+              onChange={(date) =>
+                dispatch(
+                  setFilters({
+                    ...{
+                      status,
+                      startDate: date ? date.toISOString().split('T')[0] : null,
+                      endDate,
+                    },
+                  })
+                )
+              }
               dateFormat="dd.MM.yyyy"
               className="filter-input"
             />
@@ -137,7 +158,17 @@ const MapPoolList: React.FC = () => {
             <Form.Label>Дата оформления по</Form.Label>
             <DatePicker
               selected={endDate ? new Date(endDate) : null}
-              onChange={(date) => dispatch(setFilters({ ...{ status, startDate, endDate: date ? date.toISOString().split('T')[0] : null } }))}
+              onChange={(date) =>
+                dispatch(
+                  setFilters({
+                    ...{
+                      status,
+                      startDate,
+                      endDate: date ? date.toISOString().split('T')[0] : null,
+                    },
+                  })
+                )
+              }
               dateFormat="dd.MM.yyyy"
               className="filter-input"
             />
@@ -160,7 +191,7 @@ const MapPoolList: React.FC = () => {
             <tbody>
               {mapPools.map((pool) => (
                 <tr key={pool.id}>
-                  <td className='id-index'>
+                  <td className="id-index">
                     <button
                       onClick={() => navigate(`/map_pools/${pool.id}/`)}
                       className="map-pool-link"

@@ -1,9 +1,11 @@
 import React from 'react';
+import './styles/400errors.css';
 
 const Page404: React.FC = () => {
     return (
-        <div>
-            <h1>404</h1>
+        <div className="error-page">
+            <h1 className="error-code">404</h1>
+            <p className="error-message">Страница не найдена</p>
         </div>
     );
 };

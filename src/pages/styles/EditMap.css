@@ -1,5 +1,3 @@
-/* styles/EditMap.css */
-
 .edit-map {
     margin-top: 30px;
     color: #ffffff;
@@ -117,3 +115,7 @@
 }
 
 
+.required {
+    color: #dc3545;
+    font-weight: bold;
+}

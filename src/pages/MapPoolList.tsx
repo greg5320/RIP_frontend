@@ -19,13 +19,15 @@ interface MapPool {
   creation_date: string;
   submit_date: string | null;
   complete_date: string | null;
+  player_login: string;
 }
 
 const MapPoolList: React.FC = () => {
   const [mapPools, setMapPools] = useState<MapPool[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const { status, startDate, endDate } = useSelector((state: RootState) => state.filters);
+  const { status, startDate, endDate, creator } = useSelector((state: RootState) => state.filters);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const statusTranslations: { [key: string]: string } = {
@@ -35,7 +37,7 @@ const MapPoolList: React.FC = () => {
     submitted: 'Отправлено',
   };
 
-  const fetchMapPools = async (filters?: { start_date?: string; end_date?: string; status_query?: string }) => {
+  const fetchMapPools = async (filters?: { start_date?: string; end_date?: string; status_query?: string; }) => {
     try {
       const params = new URLSearchParams();
       if (filters?.status_query) params.append('status_query', filters.status_query);
@@ -66,13 +68,14 @@ const MapPoolList: React.FC = () => {
       start_date: startDate ? startDate : undefined,
       end_date: endDate ? endDate : undefined,
     });
+
     const intervalId = setInterval(() => {
       fetchMapPools({
         status_query: status,
         start_date: startDate ? startDate : undefined,
         end_date: endDate ? endDate : undefined,
       });
-    }, 2000); 
+    }, 2000);
 
     dispatch(fetchCurrentUser());
     const checkAuth = () => {
@@ -87,23 +90,55 @@ const MapPoolList: React.FC = () => {
     };
     checkAuth();
 
-    return () => clearInterval(intervalId); 
+    return () => clearInterval(intervalId);
   }, [status, startDate, endDate, isAuthenticated, dispatch]);
 
   const handleSearch = () => {
+    console.log('Filters before search', { status, startDate, endDate, creator });
     const filters = {
       status_query: status,
       start_date: startDate ? new Date(startDate).toISOString().split('T')[0] : undefined,
       end_date: endDate ? new Date(endDate).toISOString().split('T')[0] : undefined,
+      creator_query: creator || '',  // Убедитесь, что creator передается как строка
     };
     dispatch(
       setFilters({
         status: status,
         startDate: startDate ? new Date(startDate).toISOString().split('T')[0] : null,
         endDate: endDate ? new Date(endDate).toISOString().split('T')[0] : null,
+        creator: creator || '',  // Убедитесь, что creator передается как строка
       })
     );
     fetchMapPools(filters);
+  };
+  const filteredMapPools = mapPools.filter((pool) =>
+    creator ? pool.player_login.toLowerCase().includes(creator.toLowerCase()) : true
+  );
+
+  const handleComplete = (id: number) => {
+    axiosInstance.put(`/api/map_pools/${id}/complete/`, { action: 'complete' })
+      .then(response => {
+        console.log(response.data);
+        fetchMapPools({
+          status_query: status,
+          start_date: startDate ? startDate : undefined,
+          end_date: endDate ? endDate : undefined,
+        });
+      })
+      .catch(error => console.error('Ошибка при завершении заявки:', error));
+  };
+
+  const handleReject = (id: number) => {
+    axiosInstance.put(`/api/map_pools/${id}/complete/`, { action: 'reject' })
+      .then(response => {
+        console.log(response.data);
+        fetchMapPools({
+          status_query: status,
+          start_date: startDate ? startDate : undefined,
+          end_date: endDate ? endDate : undefined,
+        });
+      })
+      .catch(error => console.error('Ошибка при отклонении заявки:', error));
   };
 
   const breadcrumbs = [
@@ -119,12 +154,23 @@ const MapPoolList: React.FC = () => {
         <h3 className="mt-4">Список заявок</h3>
         {error && <Alert variant="danger">{error}</Alert>}
         <div className="filters-bar">
+          {isStaff && (
+            <Form.Group className="filter-group">
+              <Form.Label>Создатель</Form.Label>
+              <Form.Control
+                type="text"
+                value={creator || ''}
+                onChange={(e) => dispatch(setFilters({ status, startDate, endDate, creator: e.target.value }))}
+                className="filter-input"
+              />
+            </Form.Group>
+          )}
           <Form.Group className="filter-group">
             <Form.Label>Статус</Form.Label>
             <Form.Select
               value={status}
               onChange={(e) =>
-                dispatch(setFilters({ ...{ status: e.target.value }, startDate, endDate }))
+                dispatch(setFilters({ ...{ status: e.target.value }, startDate, endDate, creator }))
               }
               className="filter-input"
             >
@@ -146,6 +192,7 @@ const MapPoolList: React.FC = () => {
                       status,
                       startDate: date ? date.toISOString().split('T')[0] : null,
                       endDate,
+                      creator,
                     },
                   })
                 )
@@ -165,10 +212,11 @@ const MapPoolList: React.FC = () => {
                       status,
                       startDate,
                       endDate: date ? date.toISOString().split('T')[0] : null,
+                      creator,
                     },
-                  })
-                )
-              }
+                  }
+                  )
+                )}
               dateFormat="dd.MM.yyyy"
               className="filter-input"
             />
@@ -177,19 +225,21 @@ const MapPoolList: React.FC = () => {
             Показать
           </Button>
         </div>
-        {mapPools.length > 0 ? (
+        {filteredMapPools.length > 0 ? (
           <Table striped bordered hover variant="dark" responsive>
             <thead>
               <tr>
                 <th>ID</th>
+                {isStaff && <th>Создатель</th>}
                 <th>Статус</th>
                 <th>Дата создания</th>
                 <th>Дата оформления</th>
                 <th>Дата завершения</th>
+                {isStaff && <th>Действия</th>}
               </tr>
             </thead>
             <tbody>
-              {mapPools.map((pool) => (
+              {filteredMapPools.map((pool) => (
                 <tr key={pool.id}>
                   <td className="id-index">
                     <button
@@ -199,10 +249,32 @@ const MapPoolList: React.FC = () => {
                       {pool.id}
                     </button>
                   </td>
+                  {isStaff && <td>{pool.player_login}</td>}
                   <td>{statusTranslations[pool.status] || pool.status}</td>
                   <td>{new Date(pool.creation_date).toLocaleString()}</td>
                   <td>{pool.submit_date ? new Date(pool.submit_date).toLocaleString() : '—'}</td>
                   <td>{pool.complete_date ? new Date(pool.complete_date).toLocaleString() : '—'}</td>
+
+                  {isStaff && (
+                    <td>
+                      <Button className="search-button"
+                        onClick={() => handleComplete(pool.id)}
+                        disabled={pool.status === 'completed' || pool.status === 'rejected'}
+                      >
+                        Завершить
+                      </Button>
+                    </td>
+                  )}
+                  {isStaff && (
+                    <td>
+                      <Button className="search-button"
+                        onClick={() => handleReject(pool.id)}
+                        disabled={pool.status === 'completed' || pool.status === 'rejected'}
+                      >
+                        Отклонить
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

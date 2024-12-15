@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Image, Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/MapPoolList.css';
+import './styles/MapPoolDetails.css';
 import axiosInstance from '../modules/axios';
 import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { Map } from '../modules/mapApi';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { AppDispatch } from '../store';
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setAuthenticated } from '../store/authSlice';
 import { fetchCurrentUser } from '../store/authSlice';
 import { RootState } from '../store';
@@ -38,7 +38,7 @@ const MapPoolDetails: React.FC = () => {
   const [playerLogin, setPlayerLogin] = useState<string>('');
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-  // const isStaff = useSelector((state: RootState) => state.auth.is_staff);
+
   const fetchMapPool = async () => {
     try {
       const response = await axiosInstance.get(`/api/map_pools/${id}/`, { withCredentials: true });
@@ -65,7 +65,7 @@ const MapPoolDetails: React.FC = () => {
     };
   
     checkAuth();
-  }, [isAuthenticated, dispatch,id]);
+  }, [isAuthenticated, dispatch, id]);
 
   const deleteMapFromDraft = async (mapId: number) => {
     try {
@@ -175,6 +175,12 @@ const MapPoolDetails: React.FC = () => {
       <Container>
         <h3>Заявка №{mapPool.id}</h3>
         {successMessage && <p className="text-success">{successMessage}</p>}
+
+        {mapPool.status === 'completed' && mapPool.popularity !== null && (
+          <div className="popularity-info">
+            <h5>Популярность: {mapPool.popularity}</h5>
+          </div>
+        )}
 
         {mapPool.status === 'draft' && (
           <>
@@ -286,7 +292,5 @@ const MapPoolDetails: React.FC = () => {
     </>
   );
 };
-
-
 
 export default MapPoolDetails;

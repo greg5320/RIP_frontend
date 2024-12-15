@@ -118,7 +118,7 @@ const EditMap: React.FC = () => {
                     <Col xs={12} md={6}>
                         <Form>
                             <Form.Group controlId="mapTitle" className="mb-3">
-                                <Form.Label>Название</Form.Label>
+                                <Form.Label>Название<span className="required">*</span></Form.Label>
                                 <Form.Control
                                     type="text"
                                     name="title"
@@ -128,7 +128,7 @@ const EditMap: React.FC = () => {
                                 />
                             </Form.Group>
                             <Form.Group controlId="mapPlayers" className="mb-3">
-                                <Form.Label>Игроки</Form.Label>
+                                <Form.Label>Игроки<span className="required">*</span></Form.Label>
                                 <Form.Control
                                     type="text"
                                     name="players"
@@ -138,7 +138,7 @@ const EditMap: React.FC = () => {
                                 />
                             </Form.Group>
                             <Form.Group controlId="mapTileset" className="mb-3">
-                                <Form.Label>Тайлсет</Form.Label>
+                                <Form.Label>Тайлсет<span className="required">*</span></Form.Label>
                                 <Form.Control
                                     type="text"
                                     name="tileset"
@@ -148,7 +148,7 @@ const EditMap: React.FC = () => {
                                 />
                             </Form.Group>
                             <Form.Group controlId="mapStatus" className="mb-3">
-                                <Form.Label>Статус</Form.Label>
+                                <Form.Label>Статус<span className="required">*</span></Form.Label>
                                 <Form.Control
                                     as="select"
                                     name="status"
@@ -179,7 +179,7 @@ const EditMap: React.FC = () => {
                 <Row>
                     <Col>
                         <Form.Group controlId="mapDescription" className="mb-3">
-                            <Form.Label>Описание</Form.Label>
+                            <Form.Label>Описание<span className="required">*</span></Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -190,7 +190,7 @@ const EditMap: React.FC = () => {
                             />
                         </Form.Group>
                         <Form.Group controlId="mapOverview" className="mb-3">
-                            <Form.Label>Обзор</Form.Label>
+                            <Form.Label>Обзор<span className="required">*</span></Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -200,6 +200,7 @@ const EditMap: React.FC = () => {
                                 required
                             />
                         </Form.Group>
+                        <p><span className="required">*</span> - обязательное поле</p>
                         <div className="text-center">
                             <Button variant="primary" className="me-2" onClick={handleSave}>
                                 Сохранить
@@ -210,6 +211,7 @@ const EditMap: React.FC = () => {
                         </div>
                     </Col>
                 </Row>
+                
             </Container>
         </>
     );

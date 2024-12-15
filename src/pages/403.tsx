@@ -1,9 +1,11 @@
 import React from 'react';
+import './styles/400errors.css';
 
 const Page403: React.FC = () => {
     return (
-        <div>
-            <h1>403</h1>
+        <div className="error-page">
+            <h1 className="error-code">403</h1>
+            <p className="error-message">Доступ запрещён</p>
         </div>
     );
 };

@@ -99,14 +99,14 @@ const MapPoolList: React.FC = () => {
       status_query: status,
       start_date: startDate ? new Date(startDate).toISOString().split('T')[0] : undefined,
       end_date: endDate ? new Date(endDate).toISOString().split('T')[0] : undefined,
-      creator_query: creator || '',  // Убедитесь, что creator передается как строка
+      creator_query: creator || '',  
     };
     dispatch(
       setFilters({
         status: status,
         startDate: startDate ? new Date(startDate).toISOString().split('T')[0] : null,
         endDate: endDate ? new Date(endDate).toISOString().split('T')[0] : null,
-        creator: creator || '',  // Убедитесь, что creator передается как строка
+        creator: creator || '',  
       })
     );
     fetchMapPools(filters);

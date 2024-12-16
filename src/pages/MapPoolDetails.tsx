@@ -134,22 +134,26 @@ const MapPoolDetails: React.FC = () => {
   const onDragEnd = async (result: any) => {
     const { destination, source } = result;
   
-    if (!destination) return; 
+    if (!destination) return;
   
     if (destination.index !== source.index) {
       const updatedMaps = Array.from(mapPool.maps);
       const [movedMap] = updatedMaps.splice(source.index, 1);
-      updatedMaps.splice(destination.index, 0, movedMap); 
-  
-      const newPositionData = updatedMaps.map((mapEntry, index) => ({
-        id: mapEntry.map.id,
-        position: index + 1, 
-      }));
+      updatedMaps.splice(destination.index, 0, movedMap);
   
       try {
-        await axiosInstance.put(`/api/map_pools/${mapPool.id}/update_positions/`, {
-          positions: newPositionData,
-        });
+        await axiosInstance.put(
+          `/api/map_pools/${mapPool.id}/map/${movedMap.map.id}/position/`,
+          { position: destination.index + 1 }
+        );
+  
+        const replacedMap = mapPool.maps[destination.index];
+        if (replacedMap) {
+          await axiosInstance.put(
+            `/api/map_pools/${mapPool.id}/map/${replacedMap.map.id}/position/`,
+            { position: source.index + 1 }
+          );
+        }
   
         setMapPool((prev) =>
           prev
@@ -163,10 +167,11 @@ const MapPoolDetails: React.FC = () => {
             : null
         );
       } catch (error) {
-        console.error('Ошибка при обновлении позиций карт:', error);
+        console.error("Ошибка при обновлении позиций карт:", error);
       }
     }
   };
+  
 
   return (
     <>

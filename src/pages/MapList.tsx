@@ -15,6 +15,7 @@ import axiosInstance from '../modules/axios';
 import { fetchCurrentUser } from '../store/authSlice';
 import type { AppDispatch } from '../store/index';
 import { setAuthenticated } from '../store/authSlice';
+import Timer from '../components/Timer';
 
 const MapList: React.FC = () => {
   const [maps, setMaps] = useState<Map[]>([]);
@@ -90,13 +91,23 @@ const MapList: React.FC = () => {
         dispatch(setAuthenticated(false));
       }
     };
-
+    
     checkAuth();
     if (isAuthenticated) {
       fetchDraftPoolInfo();
     }
   }, [isAuthenticated, dispatch]);
 
+  useEffect(() => {
+    
+    const intervalId = setInterval(() => {
+      if (isAuthenticated) {
+        fetchDraftPoolInfo();
+      }
+    }, 2000);
+
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated]);
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     dispatch(setSearchTerm(localSearchTerm));
@@ -129,6 +140,7 @@ const MapList: React.FC = () => {
     <>
       <Header />
       <BreadCrumbs crumbs={[{ label: 'Карты', path: '/maps' }]} />
+      <Timer/>
       <div className="cart-icon-container">
         <FaShoppingCart
           size={30}

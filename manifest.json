@@ -1,19 +1,19 @@
 {
   "name": "Stacraft map picker",
   "short_name": "Stacraft map picker",
-  "start_url": "/Starcraft-map-picker-frontend/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#fdfdfd",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/Starcraft-map-picker-frontend/logo192.png",
+      "src": "/logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/Starcraft-map-picker-frontend/logo192.png",
+      "src": "/logo192.png",
       "type": "image/png",
       "sizes": "512x512"
     }

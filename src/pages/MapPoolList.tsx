@@ -229,7 +229,7 @@ const MapPoolList: React.FC = () => {
           <Table striped bordered hover variant="dark" responsive>
             <thead>
               <tr>
-                <th>ID</th>
+                <th>№</th>
                 {isStaff && <th>Создатель</th>}
                 <th>Статус</th>
                 <th>Дата создания</th>

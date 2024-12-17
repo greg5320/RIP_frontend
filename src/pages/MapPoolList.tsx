@@ -235,7 +235,8 @@ const MapPoolList: React.FC = () => {
                 <th>Дата создания</th>
                 <th>Дата оформления</th>
                 <th>Дата завершения</th>
-                {isStaff && <th>Действия</th>}
+                {isStaff && <th>Завершить</th>}
+                {isStaff && <th>Отклонить</th>}
               </tr>
             </thead>
             <tbody>

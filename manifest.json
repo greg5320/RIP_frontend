@@ -1,7 +1,7 @@
 {
   "name": "Stacraft map picker",
   "short_name": "Stacraft map picker",
-  "start_url": "/",
+  "start_url": "/Starcraft-map-picker-frontend",
   "display": "standalone",
   "background_color": "#fdfdfd",
   "theme_color": "#000000",

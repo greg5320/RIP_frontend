@@ -41,21 +41,21 @@ const MainPage: React.FC = () => {
           <Carousel.Item>
             <img
               className="d-block w-100 full-width-img"
-              src="../../Ephemeron.webp"
+              src="../../Starcraft-map-picker-frontend/Ephemeron.webp"
               alt="Первый слайд"
             />
           </Carousel.Item>
           <Carousel.Item>
             <img
               className="d-block w-100 full-width-img"
-              src="../../Oxide.webp"
+              src="../../Starcraft-map-picker-frontend/Oxide.webp"
               alt="Второй слайд"
             />
           </Carousel.Item>
           <Carousel.Item>
             <img
               className="d-block w-100 full-width-img"
-              src="../../Fortitude.webp"
+              src="../../Starcraft-map-picker-frontend/Fortitude.webp"
               alt="Третий слайд"
             />
           </Carousel.Item>

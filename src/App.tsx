@@ -43,7 +43,7 @@ const App: React.FC = () => {
   }, [dispatch]);
 
   return (
-    <BrowserRouter basename="/">
+    <BrowserRouter basename="/Starcraft-map-picker-frontend">
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/maps" element={<MapList />} />

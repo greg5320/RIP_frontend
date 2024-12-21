@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Container, Alert, Form, Button } from 'react-bootstrap';
-import DatePicker from 'react-datepicker';
+import DatePicker,{ registerLocale }  from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './styles/MapPoolList.css';
 import { RootState } from '../store';
@@ -12,6 +12,7 @@ import { setFilters } from '../store/filterSlice';
 import { AppDispatch } from '../store';
 import { setAuthenticated, fetchCurrentUser } from '../store/authSlice';
 import { fetchMapPools, completeMapPool, rejectMapPool } from '../store/mapPoolSlice';
+import {ru} from 'date-fns/locale/ru'; 
 
 const MapPoolList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +55,7 @@ const MapPoolList: React.FC = () => {
   };
 
   useEffect(() => {
+    registerLocale('ru', ru);
     handleSearch();
 
     const intervalId = setInterval(() => {
@@ -141,6 +143,7 @@ const MapPoolList: React.FC = () => {
                 dispatch(setFilters({ status, startDate: date ? date.toISOString() : null, endDate, creator }))
               }
               dateFormat="dd.MM.yyyy"
+              locale="ru"
               className="filter-input"
             />
           </Form.Group>
@@ -152,6 +155,7 @@ const MapPoolList: React.FC = () => {
                 dispatch(setFilters({ status, startDate, endDate: date ? date.toISOString() : null, creator }))
               }
               dateFormat="dd.MM.yyyy"
+              locale="ru"
               className="filter-input"
             />
           </Form.Group>
@@ -161,56 +165,92 @@ const MapPoolList: React.FC = () => {
         </div>
         {filteredMapPools.length > 0 ? (
           <div className="map-pool-list">
-            {filteredMapPools.map((pool) => (
-              <div key={pool.id} className="card card-body mb-1 mt-4 row g-0 custom-card">
-                <div className="row g-0">
-                  <div className="col-md-1 d-flex align-items-center">
-                    <button onClick={() => navigate(`/map_pools/${pool.id}/`)} className="button-id">
-                      {pool.id}
-                    </button>
-                  </div>
-                  {isStaff && (
-                    <div className="col-md-1 d-flex align-items-center">
-                      <span>{pool.player_login}</span>
-                    </div>
-                  )}
-                  <div className="col-md-1 d-flex align-items-center">
-                    <span>{statusTranslations[pool.status] || pool.status}</span>
-                  </div>
-                  <div className="col-md-2 d-flex align-items-center">
-                    <span>{new Date(pool.creation_date).toLocaleString()}</span>
-                  </div>
-                  <div className="col-md-2 d-flex align-items-center">
-                    <span>{pool.submit_date ? new Date(pool.submit_date).toLocaleString() : '—'}</span>
-                  </div>
-                  <div className="col-md-2 d-flex align-items-center">
-                    <span>{pool.complete_date ? new Date(pool.complete_date).toLocaleString() : '—'}</span>
-                  </div>
-                  {isStaff && (
-                    <div className="col-md-1 d-flex align-items-center">
-                      <Button
-                        className="custom-button-map-pool"
-                        onClick={() => handleComplete(pool.id)}
-                        disabled={pool.status === 'completed' || pool.status === 'rejected'}
-                      >
-                        Завершить
-                      </Button>
-                    </div>
-                  )}
-                  {isStaff && (
-                    <div className="col-md-1 d-flex align-items-center">
-                      <Button
-                        className="custom-button-map-pool"
-                        onClick={() => handleReject(pool.id)}
-                        disabled={pool.status === 'completed' || pool.status === 'rejected'}
-                      >
-                        Отклонить
-                      </Button>
-                    </div>
-                  )}
+            <div className="card card-body mb-1 mt-4 row g-0 custom-card">
+              <div className="row g-0">
+                <div className="col-md-1">
+                  <h5 className="card-title">№</h5>
                 </div>
+                {isStaff && (
+                  <div className="col-md-1">
+                    <h5 className="card-title">Создатель</h5>
+                  </div>
+                )}
+                <div className="col-md-1">
+                  <h5 className="card-title">Статус</h5>
+                </div>
+                <div className="col-md-2">
+                  <h5 className="card-title">Дата создания</h5>
+                </div>
+                <div className="col-md-2">
+                  <h5 className="card-title">Дата оформления</h5>
+                </div>
+                <div className="col-md-2">
+                  <h5 className="card-title">Дата завершения</h5>
+                </div>
+                {isStaff && (
+                  <div className="col-md-1">
+                    <h5 className="card-title">Завершить</h5>
+                  </div>
+                )}
+                {isStaff && (
+                  <div className="col-md-1">
+                    <h5 className="card-title">Отклонить</h5>
+                  </div>
+                )}
               </div>
-            ))}
+            </div>
+            <div className="map-pool-list">
+              {filteredMapPools.map((pool) => (
+                <div key={pool.id} className="card card-body mb-1 mt-4 row g-0 custom-card">
+                  <div className="row g-0">
+                    <div className="col-md-1 d-flex align-items-center">
+                      <button onClick={() => navigate(`/map_pools/${pool.id}/`)} className="button-id">
+                        {pool.id}
+                      </button>
+                    </div>
+                    {isStaff && (
+                      <div className="col-md-1 d-flex align-items-center">
+                        <span>{pool.player_login}</span>
+                      </div>
+                    )}
+                    <div className="col-md-1 d-flex align-items-center">
+                      <span>{statusTranslations[pool.status] || pool.status}</span>
+                    </div>
+                    <div className="col-md-2 d-flex align-items-center">
+                      <span>{new Date(pool.creation_date).toLocaleString()}</span>
+                    </div>
+                    <div className="col-md-2 d-flex align-items-center">
+                      <span>{pool.submit_date ? new Date(pool.submit_date).toLocaleString() : '—'}</span>
+                    </div>
+                    <div className="col-md-2 d-flex align-items-center">
+                      <span>{pool.complete_date ? new Date(pool.complete_date).toLocaleString() : '—'}</span>
+                    </div>
+                    {isStaff && (
+                      <div className="col-md-1 d-flex align-items-center">
+                        <Button
+                          className="custom-button-map-pool"
+                          onClick={() => handleComplete(pool.id)}
+                          disabled={pool.status === 'completed' || pool.status === 'rejected'}
+                        >
+                          Завершить
+                        </Button>
+                      </div>
+                    )}
+                    {isStaff && (
+                      <div className="col-md-1 d-flex align-items-center">
+                        <Button
+                          className="custom-button-map-pool"
+                          onClick={() => handleReject(pool.id)}
+                          disabled={pool.status === 'completed' || pool.status === 'rejected'}
+                        >
+                          Отклонить
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <p>Нет доступных заявок.</p>

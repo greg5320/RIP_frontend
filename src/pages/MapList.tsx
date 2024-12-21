@@ -28,7 +28,8 @@ const MapList: React.FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const dispatch = useDispatch<AppDispatch>();
-  
+  const [refreshKey, setRefreshKey] = useState<number>(0);
+
   const sortedMaps = maps.sort((a, b) => a.title.localeCompare(b.title));
   const filterMaps = (title: string) => {
     if (title) {
@@ -80,6 +81,7 @@ const MapList: React.FC = () => {
   }, [searchTerm]);
 
   useEffect(() => {
+    
     dispatch(fetchCurrentUser());
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
@@ -96,7 +98,8 @@ const MapList: React.FC = () => {
     if (isAuthenticated) {
       fetchDraftPoolInfo();
     }
-  }, [isAuthenticated, dispatch]);
+    setRefreshKey(prevKey => prevKey + 1);
+  }, [isAuthenticated, dispatch,maps]);
 
   useEffect(() => {
     
@@ -117,11 +120,27 @@ const MapList: React.FC = () => {
     setLocalSearchTerm(event.target.value); 
   };
 
-  const handleCartClick = () => {
-    if (isAuthenticated) {
-      navigate('/map_pools');
-    } else {
-      alert('Пожалуйста, авторизуйтесь, чтобы получить доступ к пулу карт.');
+  const handleCartClick = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/maps/`);
+      const data = response.data;
+      if (data.draft_pool_count == null) {
+        alert("Добавьте карту в черновую заявку для просмотра своей корзины!");
+        return; 
+      }
+      if (isAuthenticated) {
+        const id = data.draft_pool_id;
+        if (id == null) { 
+          alert("Не удалось найти черновую заявку. Пожалуйста, попробуйте снова.");
+          return;
+        }
+        navigate(`/map_pools/${id}`);
+      } else {
+        alert('Пожалуйста, авторизуйтесь, чтобы получить доступ к пулу карт.');
+      }
+    } catch (error) {
+      console.error("Ошибка при получении данных:", error);
+      alert("Произошла ошибка при попытке открыть черновую заявку. Попробуйте позже.");
     }
   };
 
@@ -140,7 +159,7 @@ const MapList: React.FC = () => {
     <>
       <Header />
       <BreadCrumbs crumbs={[{ label: 'Карты', path: '/maps' }]} />
-      <Timer/>
+      <Timer refreshKey={refreshKey} />
       <div className="cart-icon-container">
         <FaShoppingCart
           size={30}

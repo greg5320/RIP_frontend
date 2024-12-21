@@ -1,7 +1,8 @@
+// Исправленный компонент MapPoolList
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Table, Container, Alert, Form, Button } from 'react-bootstrap';
+import { Container, Alert, Form, Button } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './styles/MapPoolList.css';
@@ -30,6 +31,7 @@ const MapPoolList: React.FC = () => {
   const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+
   const statusTranslations: { [key: string]: string } = {
     completed: 'Завершено',
     rejected: 'Отклонено',
@@ -62,22 +64,38 @@ const MapPoolList: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchMapPools({
+  const handleSearch = () => {
+    const start = startDate ? new Date(startDate).toISOString().split('T')[0] : undefined;
+    const end = endDate
+      ? new Date(new Date(endDate).setHours(23, 59, 59)).toISOString().split('T')[0]
+      : undefined;
+
+    const filters = {
       status_query: status,
-      start_date: startDate ? startDate : undefined,
-      end_date: endDate ? endDate : undefined,
-    });
+      start_date: start,
+      end_date: end,
+      creator_query: creator || '',
+    };
+    dispatch(
+      setFilters({
+        status: status,
+        startDate: startDate ? new Date(startDate).toISOString().split('T')[0] : null,
+        endDate: endDate ? new Date(endDate).toISOString().split('T')[0] : null,
+        creator: creator || '',
+      })
+    );
+    fetchMapPools(filters);
+  };
+
+  useEffect(() => {
+    handleSearch();
 
     const intervalId = setInterval(() => {
-      fetchMapPools({
-        status_query: status,
-        start_date: startDate ? startDate : undefined,
-        end_date: endDate ? endDate : undefined,
-      });
+      handleSearch();
     }, 2000);
 
     dispatch(fetchCurrentUser());
+
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
       const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
@@ -93,24 +111,6 @@ const MapPoolList: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [status, startDate, endDate, isAuthenticated, dispatch]);
 
-  const handleSearch = () => {
-    console.log('Filters before search', { status, startDate, endDate, creator });
-    const filters = {
-      status_query: status,
-      start_date: startDate ? new Date(startDate).toISOString().split('T')[0] : undefined,
-      end_date: endDate ? new Date(endDate).toISOString().split('T')[0] : undefined,
-      creator_query: creator || '',  
-    };
-    dispatch(
-      setFilters({
-        status: status,
-        startDate: startDate ? new Date(startDate).toISOString().split('T')[0] : null,
-        endDate: endDate ? new Date(endDate).toISOString().split('T')[0] : null,
-        creator: creator || '',  
-      })
-    );
-    fetchMapPools(filters);
-  };
   const filteredMapPools = mapPools.filter((pool) =>
     creator ? pool.player_login.toLowerCase().includes(creator.toLowerCase()) : true
   );
@@ -190,7 +190,7 @@ const MapPoolList: React.FC = () => {
                   setFilters({
                     ...{
                       status,
-                      startDate: date ? date.toISOString().split('T')[0] : null,
+                      startDate: date ? date.toISOString() : null,
                       endDate,
                       creator,
                     },
@@ -211,7 +211,7 @@ const MapPoolList: React.FC = () => {
                     ...{
                       status,
                       startDate,
-                      endDate: date ? date.toISOString().split('T')[0] : null,
+                      endDate: date ? date.toISOString() : null,
                       creator,
                     },
                   }
@@ -226,60 +226,99 @@ const MapPoolList: React.FC = () => {
           </Button>
         </div>
         {filteredMapPools.length > 0 ? (
-          <Table striped bordered hover variant="dark" responsive>
-            <thead>
-              <tr>
-                <th>№</th>
-                {isStaff && <th>Создатель</th>}
-                <th>Статус</th>
-                <th>Дата создания</th>
-                <th>Дата оформления</th>
-                <th>Дата завершения</th>
-                {isStaff && <th>Завершить</th>}
-                {isStaff && <th>Отклонить</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMapPools.map((pool) => (
-                <tr key={pool.id}>
-                  <td className="id-index">
+          <div className="map-pool-list">
+            <div className="card card-body mb-1 mt-4 row g-0 custom-card">
+              <div className="row g-0">
+                <div className="col-md-1">
+                  <h5 className="card-title">№</h5>
+                </div>
+                {isStaff && (
+                  <div className="col-md-1">
+                    <h5 className="card-title">Создатель</h5>
+                  </div>
+                )}
+                <div className="col-md-1">
+                  <h5 className="card-title">Статус</h5>
+                </div>
+                <div className="col-md-2">
+                  <h5 className="card-title">Дата создания</h5>
+                </div>
+                <div className="col-md-2">
+                  <h5 className="card-title">Дата оформления</h5>
+                </div>
+                <div className="col-md-2">
+                  <h5 className="card-title">Дата завершения</h5>
+                </div>
+                {isStaff && (
+                  <div className="col-md-1">
+                    <h5 className="card-title">Завершить</h5>
+                  </div>
+                )}
+                {isStaff && (
+                  <div className="col-md-1">
+                    <h5 className="card-title">Отклонить</h5>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {filteredMapPools.map((pool) => (
+              <div
+                key={pool.id}
+                className="card card-body mb-1 mt-4 row g-0 custom-card"
+              >
+                <div className="row g-0">
+                  <div className="col-md-1 d-flex align-items-center">
                     <button
                       onClick={() => navigate(`/map_pools/${pool.id}/`)}
-                      className="map-pool-link"
+                      className="button-id"
                     >
                       {pool.id}
                     </button>
-                  </td>
-                  {isStaff && <td>{pool.player_login}</td>}
-                  <td>{statusTranslations[pool.status] || pool.status}</td>
-                  <td>{new Date(pool.creation_date).toLocaleString()}</td>
-                  <td>{pool.submit_date ? new Date(pool.submit_date).toLocaleString() : '—'}</td>
-                  <td>{pool.complete_date ? new Date(pool.complete_date).toLocaleString() : '—'}</td>
-
+                  </div>
                   {isStaff && (
-                    <td>
-                      <Button className="search-button"
+                    <div className="col-md-1 d-flex align-items-center">
+                      <span>{pool.player_login}</span>
+                    </div>
+                  )}
+                  <div className="col-md-1 d-flex align-items-center">
+                    <span>{statusTranslations[pool.status] || pool.status}</span>
+                  </div>
+                  <div className="col-md-2 d-flex align-items-center">
+                    <span>{new Date(pool.creation_date).toLocaleString()}</span>
+                  </div>
+                  <div className="col-md-2 d-flex align-items-center">
+                    <span>{pool.submit_date ? new Date(pool.submit_date).toLocaleString() : '—'}</span>
+                  </div>
+                  <div className="col-md-2 d-flex align-items-center">
+                    <span>{pool.complete_date ? new Date(pool.complete_date).toLocaleString() : '—'}</span>
+                  </div>
+                  {isStaff && (
+                    <div className="col-md-1 d-flex align-items-center">
+                      <Button
+                        className="custom-button-map-pool"
                         onClick={() => handleComplete(pool.id)}
                         disabled={pool.status === 'completed' || pool.status === 'rejected'}
                       >
                         Завершить
                       </Button>
-                    </td>
+                    </div>
                   )}
                   {isStaff && (
-                    <td>
-                      <Button className="search-button"
+                    <div className="col-md-1 d-flex align-items-center">
+                      <Button
+                        className="custom-button-map-pool"
                         onClick={() => handleReject(pool.id)}
                         disabled={pool.status === 'completed' || pool.status === 'rejected'}
                       >
                         Отклонить
                       </Button>
-                    </td>
+                    </div>
                   )}
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <p>Нет доступных заявок.</p>
         )}

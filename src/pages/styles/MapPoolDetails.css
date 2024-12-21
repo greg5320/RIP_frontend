@@ -1,0 +1,20 @@
+.custom-button{
+    width: 30% !important;
+}
+.custom-card {
+    background-color: #343a40; 
+    color: white; 
+    border: none; 
+  }
+  
+  .custom-card .card-title {
+    color: #fff; 
+  }
+  
+  .custom-card .custom-button {
+    color: white;
+    border: none;
+  }
+
+  
+ 

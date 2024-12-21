@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Container, Row, Col, Image, Button, Form } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Container, Row, Image, Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/MapPoolDetails.css';
 import axiosInstance from '../modules/axios';
@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setAuthenticated } from '../store/authSlice';
 import { fetchCurrentUser } from '../store/authSlice';
 import { RootState } from '../store';
+
 
 interface MapPool {
   id: number;
@@ -31,13 +32,14 @@ interface MapPool {
 }
 
 const MapPoolDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); 
+  const { id } = useParams<{ id: string }>();
   const [mapPool, setMapPool] = useState<MapPool | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [playerLogin, setPlayerLogin] = useState<string>('');
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const navigate = useNavigate();
 
   const fetchMapPool = async () => {
     try {
@@ -56,14 +58,14 @@ const MapPoolDetails: React.FC = () => {
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
       const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
-  
+
       if (sessionCookie) {
         dispatch(setAuthenticated(true));
       } else {
         dispatch(setAuthenticated(false));
       }
     };
-  
+
     checkAuth();
   }, [isAuthenticated, dispatch, id]);
 
@@ -106,6 +108,19 @@ const MapPoolDetails: React.FC = () => {
       setSuccessMessage(null);
     }
   };
+  const deleteMapPool = async () => {
+    try {
+      if (!id) return;
+      await axiosInstance.delete(`/api/map_pools/${id}/`);
+      alert("Заявка успешно удалена!");
+      setSuccessMessage('Пул карт успешно удален!');
+      navigate('/maps');
+    } catch (error) {
+      console.error('Ошибка при удалении пула карт:', error);
+      setError('Не удалось удалить пул карт.');
+      setSuccessMessage(null);
+    }
+  };
 
   const breadcrumbs = [
     { label: 'Карты', path: '/maps' },
@@ -133,20 +148,20 @@ const MapPoolDetails: React.FC = () => {
 
   const onDragEnd = async (result: any) => {
     const { destination, source } = result;
-  
+
     if (!destination) return;
-  
+
     if (destination.index !== source.index) {
       const updatedMaps = Array.from(mapPool.maps);
       const [movedMap] = updatedMaps.splice(source.index, 1);
       updatedMaps.splice(destination.index, 0, movedMap);
-  
+
       try {
         await axiosInstance.put(
           `/api/map_pools/${mapPool.id}/map/${movedMap.map.id}/position/`,
           { position: destination.index + 1 }
         );
-  
+
         const replacedMap = mapPool.maps[destination.index];
         if (replacedMap) {
           await axiosInstance.put(
@@ -154,16 +169,16 @@ const MapPoolDetails: React.FC = () => {
             { position: source.index + 1 }
           );
         }
-  
+
         setMapPool((prev) =>
           prev
             ? {
-                ...prev,
-                maps: updatedMaps.map((mapEntry, index) => ({
-                  ...mapEntry,
-                  position: index + 1,
-                })),
-              }
+              ...prev,
+              maps: updatedMaps.map((mapEntry, index) => ({
+                ...mapEntry,
+                position: index + 1,
+              })),
+            }
             : null
         );
       } catch (error) {
@@ -171,7 +186,7 @@ const MapPoolDetails: React.FC = () => {
       }
     }
   };
-  
+
 
   return (
     <>
@@ -208,6 +223,15 @@ const MapPoolDetails: React.FC = () => {
             <Button className="custom-button" onClick={submitMapPool} variant="success">
               Подтвердить пул карт
             </Button>
+            <div className="delete-pool-container">
+              <Button
+                className="custom-button"
+                variant="danger"
+                onClick={deleteMapPool}
+              >
+                Удалить пул карт
+              </Button>
+            </div>
           </>
         )}
 
@@ -221,7 +245,7 @@ const MapPoolDetails: React.FC = () => {
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="maps" direction="vertical">
               {(provided) => (
-                <Row
+                <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className="map-pool-list"
@@ -229,18 +253,17 @@ const MapPoolDetails: React.FC = () => {
                   {sortedMaps.map((mapEntry, index) => (
                     <Draggable key={mapEntry.map.id} draggableId={mapEntry.map.id.toString()} index={index}>
                       {(provided) => (
-                        <Col
-                          xs={12}
-                          sm={6}
-                          md={4}
-                          lg={3}
+                        <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
+                          className="card card-body mb-3 mt-4 row g-0 custom-card"
                         >
-                          <div className="map-item-container">
-                            <p className="map-index-draft">{index + 1}</p> 
-                            <div className="map-item">
+                          <div className="row g-0">
+                            <div className="col-md-2">
+                              <h5 className="card-title">{index + 1}. {mapEntry.map.title}</h5>
+                            </div>
+                            <div className="col-md-6">
                               <Image
                                 src={mapEntry.map.image_url}
                                 alt={mapEntry.map.title}
@@ -248,7 +271,8 @@ const MapPoolDetails: React.FC = () => {
                                 rounded
                                 className="map-pool-image"
                               />
-                              <p>{mapEntry.map.title}</p>
+                            </div>
+                            <div className="col-md-4 d-flex align-items-center">
                               <Button
                                 className="custom-button"
                                 onClick={() => deleteMapFromDraft(mapEntry.map.id)}
@@ -257,28 +281,27 @@ const MapPoolDetails: React.FC = () => {
                               </Button>
                             </div>
                           </div>
-                        </Col>
+                        </div>
                       )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
-                </Row>
+                </div>
               )}
             </Droppable>
           </DragDropContext>
         ) : (
           <Row className="map-pool-list">
             {sortedMaps.map((mapEntry, index) => (
-              <Col
-                xs={12}
-                sm={6}
-                md={4}
-                lg={3}
+              <div
                 key={mapEntry.map.id}
+                className="card card-body mb-3 mt-4 row g-0 custom-card"
               >
-                <div className="map-item-container">
-                  <p className="map-index">{index + 1}</p> 
-                  <div className="map-item">
+                <div className="row g-0">
+                  <div className="col-md-2">
+                    <h5 className="card-title">{index + 1}. {mapEntry.map.title}</h5>
+                  </div>
+                  <div className="col-md-6">
                     <Image
                       src={mapEntry.map.image_url}
                       alt={mapEntry.map.title}
@@ -286,10 +309,9 @@ const MapPoolDetails: React.FC = () => {
                       rounded
                       className="map-pool-image"
                     />
-                    <p>{mapEntry.map.title}</p>
                   </div>
                 </div>
-              </Col>
+              </div>
             ))}
           </Row>
         )}

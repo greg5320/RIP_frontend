@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import './Timer.css'
-const Timer: React.FC = () => {
-  const [currentDateTime, setCurrentDateTime] = useState<string>(new Date().toLocaleString());
+import './Timer.css';
 
-  
+interface TimerProps {
+  refreshKey: any; 
+}
+
+const Timer: React.FC<TimerProps> = ({ refreshKey }) => {
+  const [currentDateTime, setCurrentDateTime] = useState<string>('21.12.2012');
+  console.log(currentDateTime);
   useEffect(() => {
-    console.log("Компонент монтирован или обновлен");
+    console.log('Компонент обновлен из-за изменения refreshKey');
     setCurrentDateTime(new Date().toLocaleString());
-    // const intervalId = setInterval(() => {
-    //   setCurrentDateTime(new Date().toLocaleString());
-    // }, 1000);
-
-    return () => {
-      console.log("Компонент размонтирован");
-    //   clearInterval(intervalId); 
-    };
-  }, []); 
+  }, [refreshKey]); 
 
   return (
-    <div className='timer-container'>
-      <p className='timer-text'>{currentDateTime}</p>
+    <div className="timer-container">
+      <p className="timer-text">{currentDateTime}</p>
     </div>
   );
 };

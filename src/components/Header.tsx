@@ -14,6 +14,7 @@ const Header: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const [username, setUsername] = React.useState<string | null>(null);
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -63,6 +64,10 @@ const Header: React.FC = () => {
             <LinkContainer to="/maps">
               <Nav.Link>Карты</Nav.Link>
             </LinkContainer>
+            {isAuthenticated && (<LinkContainer to="/map_pools">
+              <Nav.Link>Пул карт</Nav.Link>
+            </LinkContainer>
+            )}
             {isStaff && ( 
               <LinkContainer to="/maps/edit">
                 <Nav.Link>Список карт</Nav.Link>

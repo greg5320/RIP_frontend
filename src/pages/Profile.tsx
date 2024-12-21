@@ -1,21 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import axiosInstance from '../modules/axios';
 import { useNavigate } from 'react-router-dom';
 import './styles/Profile.css';
 import Header from '../components/Header';
 import { AppDispatch } from '../store';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAuthenticated } from '../store/authSlice';
-import { fetchCurrentUser } from '../store/authSlice';
+import { setAuthenticated, fetchCurrentUser, fetchProfile, resetPassword } from '../store/authSlice';
 import { RootState } from '../store';
 import { BreadCrumbs } from '../components/BreadCrumbs';
+
 const ProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState({
-    username: '',
-    email: '',
-    first_name: '',
-    last_name: '',
-  });
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -23,37 +16,30 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const profile = useSelector((state: RootState) => state.auth.profile);
 
   useEffect(() => {
     dispatch(fetchCurrentUser());
+    dispatch(fetchProfile());
+  }, [dispatch]);
+
+  useEffect(() => {
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
       const sessionCookie = cookies.find((cookie) => cookie.startsWith('session_id='));
-  
+
       if (sessionCookie) {
         dispatch(setAuthenticated(true));
       } else {
         dispatch(setAuthenticated(false));
-      }
-    };
-  
-    checkAuth();
-  }, [isAuthenticated, dispatch]);
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axiosInstance.put('api/users/profile/');
-        setProfile(response.data);
-      } catch (error) {
-        console.error('Ошибка при загрузке профиля:', error);
         navigate('/login');
       }
     };
 
-    fetchProfile();
-  }, [navigate]);
+    checkAuth();
+  }, [isAuthenticated, dispatch, navigate]);
 
-  const handleResetPassword = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleResetPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
     if (!password || !confirmPassword) {
@@ -68,18 +54,20 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    try {
-      await axiosInstance.put('/api/users/profile/', { password });
-      setMessage('Пароль успешно сброшен.');
-      setIsError(false);
-      setPassword('');
-      setConfirmPassword('');
-    } catch (error) {
-      console.error('Ошибка при сбросе пароля:', error);
-      setMessage('Ошибка при сбросе пароля.');
-      setIsError(true);
-    }
+    dispatch(resetPassword(password))
+      .then(() => {
+        setMessage('Пароль успешно сброшен.');
+        setIsError(false);
+        setPassword('');
+        setConfirmPassword('');
+      })
+      .catch((error) => {
+        console.error('Ошибка при сбросе пароля:', error);
+        setMessage('Ошибка при сбросе пароля.');
+        setIsError(true);
+      });
   };
+
   const breadcrumbs = [
     { label: 'Карты', path: '/maps' },
     { label: 'Профиль', path: '/profile' },
@@ -93,12 +81,11 @@ const ProfilePage: React.FC = () => {
         <h2 className="profile-title">Мой профиль</h2>
         <div className="profile-info">
           <div className="profile-item">
-            <strong>Имя пользователя:</strong> {profile.username}
+            <strong>Имя пользователя:</strong> {profile?.username}
           </div>
           <div className="profile-item">
-            <strong>Электронная почта:</strong> {profile.email}
+            <strong>Электронная почта:</strong> {profile?.email}
           </div>
-          
         </div>
         <div className="password-reset">
           <h3>Сброс пароля</h3>

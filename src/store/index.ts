@@ -4,6 +4,8 @@ import filterReducer from './filterSlice';
 import authReducer from './authSlice'; 
 import userReducer from './userSlice'; 
 import searchMapReducer from './searchMapsSlice'
+import mapPoolReducer from './mapPoolSlice';
+import mapReducer from './mapSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ const store = configureStore({
     user: userReducer, 
     filters: filterReducer,
     searchMap: searchMapReducer,
+    mapPools: mapPoolReducer,
+    maps: mapReducer,
   },
 });
 

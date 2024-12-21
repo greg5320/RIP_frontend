@@ -5,83 +5,36 @@ import { Button, FormControl, Container, Row, Col, Image } from 'react-bootstrap
 import { FaShoppingCart } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/MapList.css';
-import { Map } from '../modules/mapApi';
-import { mockMaps } from '../modules/mockData';
-import Header from '../components/Header';
-import { BreadCrumbs } from '../components/BreadCrumbs';
 import { RootState } from '../store';
 import { setSearchTerm } from '../store/searchSlice';
-import axiosInstance from '../modules/axios';
+import { fetchMaps, fetchDraftPoolInfo, addToDraftPool,fetchDraftPoolInfoId } from '../store/mapSlice';
 import { fetchCurrentUser } from '../store/authSlice';
 import type { AppDispatch } from '../store/index';
 import { setAuthenticated } from '../store/authSlice';
 import Timer from '../components/Timer';
+import Header from '../components/Header';
+import { BreadCrumbs } from '../components/BreadCrumbs';
 
 const MapList: React.FC = () => {
-  const [maps, setMaps] = useState<Map[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [draftPoolCount, setDraftPoolCount] = useState<number>(0);
+  const [localSearchTerm, setLocalSearchTerm] = useState<string>('');
   const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
-  const [localSearchTerm, setLocalSearchTerm] = useState<string>(searchTerm);
-  const defaultImageUrl = 'http://127.0.0.1:9000/mybucket/map_not_found.png';
-  const navigate = useNavigate();
+  const maps = useSelector((state: RootState) => state.maps.maps);
+  const error = useSelector((state: RootState) => state.maps.error);
+  const draftPoolCount = useSelector((state: RootState) => state.maps.draftPoolCount);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-  const isStaff = useSelector((state: RootState) => state.auth.is_staff);
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
-  const sortedMaps = maps.sort((a, b) => a.title.localeCompare(b.title));
-  const filterMaps = (title: string) => {
-    if (title) {
-      return mockMaps.filter((map) =>
-        map.title.toLowerCase().includes(title.toLowerCase())
-      );
-    }
-    return mockMaps;
-  };
-
-  const fetchMaps = async (title: string = '') => {
-    try {
-      const response = await axiosInstance.get(`/api/maps/`, {
-        params: { title },
-        withCredentials: true,
-      });
-      const data = response.data;
-
-      if (data.maps) {
-        setMaps(data.maps);
-        setError(null);
-      } else {
-        setMaps([]);
-        setError('Нет карт, соответствующих запросу');
-      }
-    } catch (error) {
-      console.warn('Ошибка при загрузке карт, используем моковые данные');
-      setMaps(filterMaps(title));
-      setError('Ошибка при загрузке карт, используем моковые данные');
-    }
-  };
-
-  const fetchDraftPoolInfo = async () => {
-    try {
-      const response = await axiosInstance.get(`/api/maps/`);
-      const data = response.data;
-
-      if (data.draft_pool_count !== undefined) {
-        setDraftPoolCount(data.draft_pool_count);
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке информации о пуле карт', error);
-    }
-  };
+  const sortedMaps = [...maps].sort((a, b) => a.title.localeCompare(b.title));
 
   useEffect(() => {
-    setLocalSearchTerm(searchTerm); 
-    fetchMaps(searchTerm);
-  }, [searchTerm]);
+    setLocalSearchTerm(searchTerm);
+    dispatch(fetchMaps(searchTerm));
+    setRefreshKey((prevKey) => prevKey + 1); 
+  }, [searchTerm, dispatch]);
 
   useEffect(() => {
-    
     dispatch(fetchCurrentUser());
     const checkAuth = () => {
       const cookies = document.cookie.split('; ');
@@ -96,40 +49,41 @@ const MapList: React.FC = () => {
     
     checkAuth();
     if (isAuthenticated) {
-      fetchDraftPoolInfo();
+      dispatch(fetchDraftPoolInfo());
     }
-    setRefreshKey(prevKey => prevKey + 1);
-  }, [isAuthenticated, dispatch,maps]);
+    setRefreshKey((prevKey) => prevKey + 1); 
+  }, [isAuthenticated, dispatch]);
 
   useEffect(() => {
-    
     const intervalId = setInterval(() => {
       if (isAuthenticated) {
-        fetchDraftPoolInfo();
+        dispatch(fetchDraftPoolInfo());
       }
     }, 2000);
 
     return () => clearInterval(intervalId);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, dispatch]);
+
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     dispatch(setSearchTerm(localSearchTerm));
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalSearchTerm(event.target.value); 
+    setLocalSearchTerm(event.target.value);
   };
 
   const handleCartClick = async () => {
     try {
-      const response = await axiosInstance.get(`/api/maps/`);
-      const data = response.data;
-      if (data.draft_pool_count == null) {
+      const id = await dispatch(fetchDraftPoolInfoId()).unwrap();
+      const count = await dispatch(fetchDraftPoolInfo()).unwrap();
+
+      if (count == null) {
         alert("Добавьте карту в черновую заявку для просмотра своей корзины!");
         return; 
       }
+
       if (isAuthenticated) {
-        const id = data.draft_pool_id;
         if (id == null) { 
           alert("Не удалось найти черновую заявку. Пожалуйста, попробуйте снова.");
           return;
@@ -144,15 +98,9 @@ const MapList: React.FC = () => {
     }
   };
 
-  const addToDraft = async (mapId: number) => {
-    try {
-      const response = await axiosInstance.post('/api/maps/draft/', { map_id: mapId });
-      console.log(`Карта с ID ${mapId} успешно добавлена в пул заявок`, response.data);
-      alert('Карта успешно добавлена в пул заявок');
-    } catch (error) {
-      console.error(`Ошибка при добавлении карты с ID ${mapId} в пул заявок`, error);
-      alert('Произошла ошибка при добавлении карты');
-    }
+  const addToDraft = (mapId: number) => {
+    dispatch(addToDraftPool(mapId));
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   return (
@@ -167,7 +115,7 @@ const MapList: React.FC = () => {
           className="cart-icon"
           style={{ cursor: isAuthenticated ? 'pointer' : 'not-allowed' }}
         />
-        {isAuthenticated && !isStaff && draftPoolCount > 0 && (
+        {isAuthenticated && draftPoolCount > 0 && (
           <span className="cart-count">{draftPoolCount}</span>
         )}
       </div>
@@ -184,7 +132,7 @@ const MapList: React.FC = () => {
               />
             </Col>
             <Col xs="auto">
-              <Button type="submit" variant="primary" className='search-button'>
+              <Button type="submit" variant="primary" className="search-button">
                 Поиск
               </Button>
             </Col>
@@ -203,7 +151,7 @@ const MapList: React.FC = () => {
               >
                 <Link to={`/maps/${map.id}`}>
                   <Image
-                    src={map.image_url ? map.image_url : defaultImageUrl}
+                    src={map.image_url || 'http://127.0.0.1:9000/mybucket/map_not_found.png'}
                     alt={map.title}
                     fluid
                     rounded

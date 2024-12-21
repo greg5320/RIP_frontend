@@ -8,6 +8,12 @@ interface AuthState {
   user: any | null;
   isAuthenticated: boolean;
   is_staff: boolean;
+  profile: {
+    username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  } | null;
 }
 
 const initialState: AuthState = {
@@ -15,7 +21,8 @@ const initialState: AuthState = {
   error: null,
   user: null,
   isAuthenticated: false,
-  is_staff: false
+  is_staff: false,
+  profile: null,
 };
 
 export const registerUser = createAsyncThunk(
@@ -69,6 +76,29 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 );
 
+export const fetchProfile = createAsyncThunk(
+  'auth/fetchProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get('/api/users/profile/');
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'Ошибка загрузки профиля');
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async (password: string, { rejectWithValue }) => {
+    try {
+      await axiosInstance.put('/api/users/profile/', { password });
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'Ошибка сброса пароля');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -86,7 +116,6 @@ const authSlice = createSlice({
     logout: (state) => {
       state.isAuthenticated = false;
     },
-    
   },
   extraReducers: (builder) => {
     builder
@@ -133,16 +162,36 @@ const authSlice = createSlice({
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
+      })
+      .addCase(fetchProfile.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchProfile.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.profile = action.payload;
+      })
+      .addCase(fetchProfile.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.status = 'succeeded';
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
       });
   },
 });
 
-
 export const { resetAuthStatus, setAuthenticated, login, logout } = authSlice.actions;
-
 
 export const selectAuthStatus = (state: RootState) => state.auth.status;
 export const selectAuthError = (state: RootState) => state.auth.error;
 export const selectUser = (state: RootState) => state.auth.user;
+export const selectProfile = (state: RootState) => state.auth.profile;
 
 export default authSlice.reducer;

@@ -3,89 +3,57 @@ import { Button, Container, Row, Col, FormControl } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setSearchTerm } from '../store/searchMapsSlice';
-import axiosInstance from '../modules/axios';
+import { fetchMaps, addNewMap, removeMap } from '../store/mapSlice';
 import './styles/EditMapList.css';
 import Header from '../components/Header';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import { RootState } from '../store';
+import { AppDispatch } from '../store';
 
-interface Map {
-  id: number;
-  title: string;
-  image_url: string;
-}
 
 const EditMapList: React.FC = () => {
-  const [maps, setMaps] = useState<Map[]>([]);
+  const [localSearchTerm, setLocalSearchTerm] = useState<string>('');
+  const maps = useSelector((state: RootState) => state.maps.maps);
+  const loading = useSelector((state: RootState) => state.maps.loading);
+  const error = useSelector((state: RootState) => state.maps.error);
   const searchTerm = useSelector((state: RootState) => state.searchMap.searchTerm);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [localSearchTerm, setLocalSearchTerm] = useState<string>(searchTerm);
-
-  const fetchMaps = async (title: string = '') => {
-    try {
-      const response = await axiosInstance.get('/api/maps/', {
-        params: { title },
-      });
-      setMaps(response.data.maps || []);
-    } catch (error) {
-      console.error('Ошибка при загрузке карт', error);
-    }
-  };
-
-  const handleEdit = (mapId: number) => {
-    navigate(`/maps/edit/${mapId}`);
-  };
-
-  const handleDelete = async (mapId: number) => {
-    if (window.confirm('Вы уверены, что хотите удалить эту карту?')) {
-      try {
-        await axiosInstance.delete(`/api/maps/${mapId}/`);
-        setMaps((prevMaps) => prevMaps.filter((map) => map.id !== mapId));
-      } catch (error) {
-        console.error('Ошибка при удалении карты', error);
-      }
-    }
-  };
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     dispatch(setSearchTerm(localSearchTerm));
   };
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearchTerm(event.target.value);
   };
-
-  const handleAddMap = async () => {
-    try {
-      const response = await axiosInstance.post('/api/maps/', {
-        "title": "Новая карта",
-        "players": "",
-        "tileset": "",
-        "status": "active",
-        "description": "",
-        "overview": "",
-        "image_url":"http://127.0.0.1:9000/mybucket/map_not_found.png"
-    },
-      {
-        headers: {
-        'Content-Type': 'application/json',
-      },
-      withCredentials: true,});
-      const newMapId = response.data.id;
-      navigate(`/maps/edit/${newMapId}`);
-    } catch (error) {
-      console.error('Ошибка при создании карты', error);
-      alert('Ошибка при создании новой карты.');
+  const handleEdit = (mapId: number) => {
+    navigate(`/maps/edit/${mapId}`);
+  };
+  const handleDelete = (mapId: number) => {
+    if (window.confirm('Вы уверены, что хотите удалить эту карту?')) {
+      dispatch(removeMap(mapId));
     }
-  }
-    
+  };
+
+  const handleAddMap = () => {
+    const newMap = {
+      title: 'Новая карта',
+      players: '',
+      tileset: '',
+      status: 'active',
+      description: '',
+      overview: '',
+      image_url: 'http://127.0.0.1:9000/mybucket/map_not_found.png',
+    };
+
+    dispatch(addNewMap(newMap));
+  };
 
   useEffect(() => {
     setLocalSearchTerm(searchTerm);
-    fetchMaps(searchTerm);
-  }, [searchTerm]);
+    dispatch(fetchMaps(searchTerm));
+  }, [searchTerm, dispatch]);
 
   const breadcrumbs = [{ label: 'Список карт', path: '/edit' }];
 
@@ -114,7 +82,11 @@ const EditMapList: React.FC = () => {
         </form>
 
         <Row className="map-container1 mt-4">
-          {maps.length > 0 ? (
+          {loading ? (
+            <p>Загрузка...</p>
+          ) : error ? (
+            <p>Ошибка: {error}</p>
+          ) : maps.length > 0 ? (
             maps.map((map) => (
               <div key={map.id} className="map-row1">
                 <img src={map.image_url} alt={map.title} className="map-image1" />

@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/MapList.css';
 import { RootState } from '../store';
 import { setSearchTerm } from '../store/searchSlice';
-import { fetchMaps, fetchDraftPoolInfo, addToDraftPool,fetchDraftPoolInfoId } from '../store/mapSlice';
+import { fetchMaps, fetchDraftPoolInfo, addToDraftPool, fetchDraftPoolInfoId } from '../store/mapSlice';
 import { fetchCurrentUser } from '../store/authSlice';
 import type { AppDispatch } from '../store/index';
 import { setAuthenticated } from '../store/authSlice';
@@ -17,10 +17,10 @@ import { BreadCrumbs } from '../components/BreadCrumbs';
 
 const MapList: React.FC = () => {
   const [localSearchTerm, setLocalSearchTerm] = useState<string>('');
+  const [draftPoolCountState, setDraftPoolCountState] = useState<number>(0); 
   const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
   const maps = useSelector((state: RootState) => state.maps.maps);
   const error = useSelector((state: RootState) => state.maps.error);
-  const draftPoolCount = useSelector((state: RootState) => state.maps.draftPoolCount);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -46,23 +46,22 @@ const MapList: React.FC = () => {
         dispatch(setAuthenticated(false));
       }
     };
-    
+
     checkAuth();
     if (isAuthenticated) {
-      dispatch(fetchDraftPoolInfo());
+      updateDraftPoolCount();
     }
-    setRefreshKey((prevKey) => prevKey + 1); 
   }, [isAuthenticated, dispatch]);
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (isAuthenticated) {
-        dispatch(fetchDraftPoolInfo());
-      }
-    }, 2000);
-
-    return () => clearInterval(intervalId);
-  }, [isAuthenticated, dispatch]);
+  const updateDraftPoolCount = async () => {
+    try {
+      const count = await dispatch(fetchDraftPoolInfo()).unwrap();
+      setRefreshKey((prevKey) => prevKey + 1); 
+      setDraftPoolCountState(count); 
+    } catch (error) {
+      console.error("Ошибка обновления количества услуг:", error);
+    }
+  };
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -76,9 +75,7 @@ const MapList: React.FC = () => {
   const handleCartClick = async () => {
     try {
       const id = await dispatch(fetchDraftPoolInfoId()).unwrap();
-      const count = await dispatch(fetchDraftPoolInfo()).unwrap();
-
-      if (count == null) {
+      if (draftPoolCountState === 0) {
         alert("Добавьте карту в черновую заявку для просмотра своей корзины!");
         return; 
       }
@@ -98,9 +95,13 @@ const MapList: React.FC = () => {
     }
   };
 
-  const addToDraft = (mapId: number) => {
-    dispatch(addToDraftPool(mapId));
-    setRefreshKey((prevKey) => prevKey + 1);
+  const addToDraft = async (mapId: number) => {
+    try {
+      await dispatch(addToDraftPool(mapId));
+      updateDraftPoolCount(); 
+    } catch (error) {
+      console.error("Ошибка добавления карты в заявку:", error);
+    }
   };
 
   return (
@@ -115,8 +116,8 @@ const MapList: React.FC = () => {
           className="cart-icon"
           style={{ cursor: isAuthenticated ? 'pointer' : 'not-allowed' }}
         />
-        {isAuthenticated && draftPoolCount > 0 && (
-          <span className="cart-count">{draftPoolCount}</span>
+        {isAuthenticated && draftPoolCountState > 0 && ( 
+          <span className="cart-count">{draftPoolCountState}</span>
         )}
       </div>
       <Container>

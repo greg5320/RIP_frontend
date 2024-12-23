@@ -55,7 +55,7 @@ export const completeMapPool = createAsyncThunk<
 >('mapPools/completeMapPool', async (id, { dispatch, rejectWithValue }) => {
   try {
     await axiosInstance.put(`/api/map_pools/${id}/complete/`, { action: 'complete' });
-    dispatch(fetchMapPools({})); 
+    dispatch(fetchMapPools({}));
   } catch (error: any) {
     return rejectWithValue('Ошибка при завершении заявки.');
   }
@@ -68,7 +68,7 @@ export const rejectMapPool = createAsyncThunk<
 >('mapPools/rejectMapPool', async (id, { dispatch, rejectWithValue }) => {
   try {
     await axiosInstance.put(`/api/map_pools/${id}/complete/`, { action: 'reject' });
-    dispatch(fetchMapPools({})); 
+    dispatch(fetchMapPools({}));
   } catch (error: any) {
     return rejectWithValue('Ошибка при отклонении заявки.');
   }

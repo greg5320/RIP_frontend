@@ -15,6 +15,7 @@ const Timer: React.FC<TimerProps> = ({ refreshKey }) => {
   useEffect(() => {
     console.log('Компонент обновлен из-за изменения refreshKey');
     setCurrentDateTime(new Date().toLocaleString());
+    console.log("Текущая дата:", currentDateTime)
   }, [refreshKey]); 
 
   return (
